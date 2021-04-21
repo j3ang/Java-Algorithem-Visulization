@@ -7,7 +7,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
-import models.User;
+import models.UserModel;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -46,20 +46,20 @@ public class ProfileController extends  UsersController implements Initializable
             TextField tf = (TextField)usersVboxInput.lookup("#" + usersVboxInput.getChildren().get(i).getId());
             switch (i){
                 case 0:
-                    tf.setText(String.valueOf(Main.userLoggedIn.getUser_id()));
+                    tf.setText(String.valueOf(Main.userModelLoggedIn.getUser_id()));
                     break;
                 case 1:
-                    tf.setText(Main.userLoggedIn.getFirstname());
+                    tf.setText(Main.userModelLoggedIn.getFirstname());
                     break;
                 case 2:
-                    tf.setText(Main.userLoggedIn.getLastname());
+                    tf.setText(Main.userModelLoggedIn.getLastname());
                     break;
                 case 3:
-                    tf.setText(Main.userLoggedIn.getUsername());
+                    tf.setText(Main.userModelLoggedIn.getUsername());
                     tf.setDisable(true);
                     break;
                 case 4:
-                    tf.setText(Main.userLoggedIn.getPassword());
+                    tf.setText(Main.userModelLoggedIn.getPassword());
                     break;
             }
         }
@@ -70,46 +70,46 @@ public class ProfileController extends  UsersController implements Initializable
         System.out.println("update button in profile controller clicked.");
 
         try{
-            User updateUser = new User();
+            UserModel updateUserModel = new UserModel();
             boolean pwChanged = false;
             for (int i=0; i< usersVboxInput.getChildren().size(); i++){
                 TextField tf = (TextField)usersVboxInput.lookup("#" + usersVboxInput.getChildren().get(i).getId());
                 switch (i){
                     case 0:
-                        updateUser.setUser_id(Integer.parseInt(tf.getText().strip()));
+                        updateUserModel.setUser_id(Integer.parseInt(tf.getText().strip()));
                         break;
                     case 1:
-                        updateUser.setFirstname(tf.getText().strip());
+                        updateUserModel.setFirstname(tf.getText().strip());
                         break;
                     case 2:
-                        updateUser.setLastname(tf.getText().strip());
+                        updateUserModel.setLastname(tf.getText().strip());
                         break;
                     case 3:
-                        updateUser.setUsername(tf.getText().strip());
+                        updateUserModel.setUsername(tf.getText().strip());
                         break;
                     case 4:
                         String currTfPwHashed  = SignupController.hashPassword(tf.getText().strip());
                         // incase use has accidentally changed the password
-                        if (  !Main.userLoggedIn.getPassword().equals(tf.getText().strip()) ){
+                        if (  !Main.userModelLoggedIn.getPassword().equals(tf.getText().strip()) ){
 
-                            System.out.println("Main logedin user paassword: " + Main.userLoggedIn.getPassword());
+                            System.out.println("Main logedin user paassword: " + Main.userModelLoggedIn.getPassword());
                             System.out.println("Textfield password: " + tf.getText().strip());
                             System.out.println("password changed");
 
-                            updateUser.setPassword(currTfPwHashed);
+                            updateUserModel.setPassword(currTfPwHashed);
                             pwChanged  = true;
 
                         } else{
-                            updateUser.setPassword(tf.getText().strip());
+                            updateUserModel.setPassword(tf.getText().strip());
                         }
 
                         break;
                 }
             }
 
-            updateUser.save(true, false);
-            updateUser.setRoles(Main.userLoggedIn.getRoles());
-            Main.userLoggedIn = updateUser; // update static logged in user
+            updateUserModel.save(true, false);
+            updateUserModel.setRoles(Main.userModelLoggedIn.getRoles());
+            Main.userModelLoggedIn = updateUserModel; // update static logged in user
             setUpLoggedInUser(); // refresh loggedIn user
 
             // if password has changed, logout

@@ -1,7 +1,6 @@
 package models;
 
 import com.google.gson.Gson;
-import io.github.cdimascio.dotenv.Dotenv;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -9,14 +8,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Vector;
 
-public class User {
+public class UserModel {
     private int user_id;
     private String firstname, lastname, username, password, dt_created;
     private ArrayList<String>roles;
     DaoModel dao = new DaoModel();
     String usersTable = dao.getTableName("users");
 
-    public User(int user_id, String firstname, String lastname, String username, String password, String dt_created) {
+    public UserModel(int user_id, String firstname, String lastname, String username, String password, String dt_created) {
         this.user_id = user_id;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -25,7 +24,7 @@ public class User {
         this.dt_created = dt_created;
     }
 
-    public User(int user_id, String firstname, String lastname, String username, String password) {
+    public UserModel(int user_id, String firstname, String lastname, String username, String password) {
         this.user_id = user_id;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -33,7 +32,7 @@ public class User {
         this.password = password;
     }
 
-    public User(String firstname, String lastname, String username, String password, ArrayList<String>roles) {
+    public UserModel(String firstname, String lastname, String username, String password, ArrayList<String>roles) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.username = username;
@@ -41,17 +40,17 @@ public class User {
         this.roles = roles;
     }
 
-    public User(String firstname, String lastname, String username, String password) {
+    public UserModel(String firstname, String lastname, String username, String password) {
         this.firstname = firstname;
         this.lastname = lastname;
         this.username = username;
         this.password = password;
     }
 
-    public User() {
+    public UserModel() {
     }
 
-    public User(int user_id, ArrayList<String> roles) {
+    public UserModel(int user_id, ArrayList<String> roles) {
         this.user_id = user_id;
         this.roles = roles;
     }
@@ -96,7 +95,7 @@ public class User {
 
     }
 
-    public static void getUserRole(DaoModel dao, User user){
+    public static void getUserRole(DaoModel dao, UserModel user){
 
         try{
             ArrayList<String> thisUserRoles = new ArrayList<>();
@@ -122,7 +121,7 @@ public class User {
 
     }
 
-    public static void setUserRole(DaoModel dao, User user){
+    public static void setUserRole(DaoModel dao, UserModel user){
         System.out.println("set user role: " + user.getRoles());
 
         // set user roles in usermeta
@@ -148,7 +147,7 @@ public class User {
                 System.out.println("executed updateUsermeta: " + updateUsermeta);
 
             } else { // create new usermeta user_roles
-                Usermeta userMeta = new Usermeta(
+                UsermetaModel userMeta = new UsermetaModel(
                         user.getUser_id(), "user_roles", new Gson().toJson(user.getRoles()) );
                 userMeta.save(false);
             }
@@ -178,8 +177,8 @@ public class User {
 
 
 
-    public static User getUserByUsername(String username){
-        User user = new User();
+    public static UserModel getUserByUsername(String username){
+        UserModel user = new UserModel();
         DaoModel dao = new DaoModel();
         String  usersTable = dao.getTableName("users");
 
@@ -206,8 +205,8 @@ public class User {
     }
 
 
-    public User getUserById(int user_id){
-        User user = new User();
+    public UserModel getUserById(int user_id){
+        UserModel user = new UserModel();
         String whereClause = "user_id=" + user_id;
 
         String sql = dao.prepareSelectStmt(usersTable, whereClause);
@@ -227,8 +226,8 @@ public class User {
         return user;
     }
 
-    public static User vectorToUser(String[] parsedUser){
-        User user = new User(
+    public static UserModel vectorToUser(String[] parsedUser){
+        UserModel user = new UserModel(
                 Integer.parseInt(parsedUser[0]),
                 parsedUser[1],
                 parsedUser[2],
@@ -242,7 +241,7 @@ public class User {
         return user_id;
     }
 
-    public User setUser_id(int user_id) {
+    public UserModel setUser_id(int user_id) {
         this.user_id = user_id;
         return this;
     }
@@ -251,7 +250,7 @@ public class User {
         return firstname;
     }
 
-    public User setFirstname(String firstname) {
+    public UserModel setFirstname(String firstname) {
         this.firstname = firstname;
         return this;
     }
@@ -260,7 +259,7 @@ public class User {
         return lastname;
     }
 
-    public User setLastname(String lastname) {
+    public UserModel setLastname(String lastname) {
         this.lastname = lastname;
         return this;
     }
@@ -269,7 +268,7 @@ public class User {
         return username;
     }
 
-    public User setUsername(String username) {
+    public UserModel setUsername(String username) {
         this.username = username;
         return this;
     }
@@ -278,7 +277,7 @@ public class User {
         return password;
     }
 
-    public User setPassword(String password) {
+    public UserModel setPassword(String password) {
         this.password = password;
         return this;
     }
@@ -287,7 +286,7 @@ public class User {
         return dt_created;
     }
 
-    public User setDt_created(String dt_created) {
+    public UserModel setDt_created(String dt_created) {
         this.dt_created = dt_created;
         return this;
     }
@@ -296,7 +295,7 @@ public class User {
         return roles;
     }
 
-    public User setRoles(ArrayList<String> roles) {
+    public UserModel setRoles(ArrayList<String> roles) {
         this.roles = roles;
         return this;
     }

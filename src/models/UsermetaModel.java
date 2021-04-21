@@ -1,24 +1,23 @@
 package models;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Vector;
 
-public class Usermeta {
+public class UsermetaModel {
     private int meta_id, user_id;
     private String mata_name, meta_desc;
 
-    public Usermeta() {
+    public UsermetaModel() {
     }
 
 
-    public Usermeta(int user_id, String mata_name, String meta_desc) {
+    public UsermetaModel(int user_id, String mata_name, String meta_desc) {
         this.user_id = user_id;
         this.mata_name = mata_name;
         this.meta_desc = meta_desc;
     }
 
-    public Usermeta(int meta_id, int user_id, String mata_name, String meta_desc) {
+    public UsermetaModel(int meta_id, int user_id, String mata_name, String meta_desc) {
         this.meta_id = meta_id;
         this.user_id = user_id;
         this.mata_name = mata_name;
@@ -49,7 +48,7 @@ public class Usermeta {
         return meta_id;
     }
 
-    public Usermeta setMeta_id(int meta_id) {
+    public UsermetaModel setMeta_id(int meta_id) {
         this.meta_id = meta_id;
         return this;
     }
@@ -58,7 +57,7 @@ public class Usermeta {
         return user_id;
     }
 
-    public Usermeta setUser_id(int user_id) {
+    public UsermetaModel setUser_id(int user_id) {
         this.user_id = user_id;
         return this;
     }
@@ -67,7 +66,7 @@ public class Usermeta {
         return mata_name;
     }
 
-    public Usermeta setMata_name(String mata_name) {
+    public UsermetaModel setMata_name(String mata_name) {
         this.mata_name = mata_name;
         return this;
     }
@@ -76,7 +75,7 @@ public class Usermeta {
         return meta_desc;
     }
 
-    public Usermeta setMeta_desc(String meta_desc) {
+    public UsermetaModel setMeta_desc(String meta_desc) {
         this.meta_desc = meta_desc;
         return this;
     }

@@ -8,14 +8,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import models.*;
 
 import java.net.URL;
@@ -48,17 +45,17 @@ public class UsersController extends ConfigurationController implements Initiali
 
     // Table Column Fields
     @FXML
-    private TableColumn<User, Integer> usersColUserId;
+    private TableColumn<UserModel, Integer> usersColUserId;
     @FXML
-    private TableColumn<User, String> usersColFirstname;
+    private TableColumn<UserModel, String> usersColFirstname;
     @FXML
-    private TableColumn<User, String> usersColLastname;
+    private TableColumn<UserModel, String> usersColLastname;
     @FXML
-    private TableColumn<User, String> usersColUsername;
+    private TableColumn<UserModel, String> usersColUsername;
     @FXML
-    private TableColumn<User, String> usersColPassword;
+    private TableColumn<UserModel, String> usersColPassword;
     @FXML
-    private TableColumn<User, String> usersColRole;
+    private TableColumn<UserModel, String> usersColRole;
 
     // CRUD Buttons
     @FXML
@@ -91,6 +88,7 @@ public class UsersController extends ConfigurationController implements Initiali
         showUsers();
         showRoles();
         bindUpdateBtn(usersBtnUpdate);
+        bindUpdateBtn(usersBtnDelete); // delete button has same bindings
         bindNewBtn(usersBtnNewUser);
     }
 
@@ -117,9 +115,10 @@ public class UsersController extends ConfigurationController implements Initiali
         );
     }
 
-    public ObservableList<User> getUsersList(){
-        ObservableList<User> usersList = FXCollections.observableArrayList();
-        Vector users = User.getAllUsers();
+
+    public ObservableList<UserModel> getUsersList(){
+        ObservableList<UserModel> usersList = FXCollections.observableArrayList();
+        Vector users = UserModel.getAllUsers();
         DaoModel dao = new DaoModel();
 
         // Create a new user per each result set row
@@ -129,13 +128,13 @@ public class UsersController extends ConfigurationController implements Initiali
                     .replaceAll("\\]","")
                     .split(",");
 
-            User user = User.vectorToUser(parsedUser);
+            UserModel userModel = UserModel.vectorToUser(parsedUser);
 
 
             try{ // Check if this user has role assigned
                 ArrayList<String> thisUserRoles = new ArrayList<>();
                 String sql = "SELECT meta_desc from " + dao.getTableName("usermeta") +
-                    " where user_id="+ user.getUser_id() +" and meta_name='user_roles'";
+                    " where user_id="+ userModel.getUser_id() +" and meta_name='user_roles'";
                 ResultSet rs = new DbConnect().connect().createStatement().executeQuery(sql);
                 ResultSetMetaData rsmd = rs.getMetaData();
                 int columnsNumber = rsmd.getColumnCount();
@@ -145,11 +144,11 @@ public class UsersController extends ConfigurationController implements Initiali
                         if (j > 1) System.out.print(",  ");
                         String columnValue = rs.getString(j).replaceAll("\\p{Punct}", "");
                         thisUserRoles.add(columnValue);
-                        user.setRoles(thisUserRoles);
+                        userModel.setRoles(thisUserRoles);
                     }
                 } else {
                     thisUserRoles.add("User");
-                    user.setRoles(thisUserRoles);
+                    userModel.setRoles(thisUserRoles);
                 }
 
                 rs.close();
@@ -157,17 +156,17 @@ public class UsersController extends ConfigurationController implements Initiali
                 throwables.printStackTrace();
             }
 
-            usersList.add(user); // Populate the user Observable list
+            usersList.add(userModel); // Populate the user Observable list
         }
         return usersList;
     }
 
-    public ObservableList<Role> getRoleCapsList(){
-        ObservableList<Role> optionList = FXCollections.observableArrayList();
-        Option optionModel = new Option();
+    public ObservableList<RoleModel> getRoleCapsList(){
+        ObservableList<RoleModel> optionList = FXCollections.observableArrayList();
+        OptionModel optionModel = new OptionModel();
 
         // option role_capabilities is a vector of role_cap key pairs
-        Vector<Role> role_caps = optionModel.getRoleCapOption("role_capabilities");
+        Vector<RoleModel> role_caps = optionModel.getRoleCapOption("role_capabilities");
         for ( int i = 0 ; i < role_caps.size(); i++ ){
             optionList.add(role_caps.get(i));
         }
@@ -181,21 +180,21 @@ public class UsersController extends ConfigurationController implements Initiali
 
     public void showUsers(){
 
-        ObservableList<User> users = getUsersList();
+        ObservableList<UserModel> userModels = getUsersList();
 
-        usersColUserId.setCellValueFactory(new PropertyValueFactory<User, Integer>("user_id"));
-        usersColFirstname.setCellValueFactory(new PropertyValueFactory<User, String>("firstname"));
-        usersColLastname.setCellValueFactory(new PropertyValueFactory<User, String>("lastname"));
-        usersColUsername.setCellValueFactory(new PropertyValueFactory<User, String>("username"));
-        usersColPassword.setCellValueFactory(new PropertyValueFactory<User, String>("password"));
-        usersColRole.setCellValueFactory(new PropertyValueFactory<User, String>("roles"));
+        usersColUserId.setCellValueFactory(new PropertyValueFactory<UserModel, Integer>("user_id"));
+        usersColFirstname.setCellValueFactory(new PropertyValueFactory<UserModel, String>("firstname"));
+        usersColLastname.setCellValueFactory(new PropertyValueFactory<UserModel, String>("lastname"));
+        usersColUsername.setCellValueFactory(new PropertyValueFactory<UserModel, String>("username"));
+        usersColPassword.setCellValueFactory(new PropertyValueFactory<UserModel, String>("password"));
+        usersColRole.setCellValueFactory(new PropertyValueFactory<UserModel, String>("roles"));
 
-        usersTable.setItems(users);
+        usersTable.setItems(userModels);
         System.out.println("UsersController.showUsers()");
     }
 
     public void showRoles(){
-        ObservableList<Role> roleList = getRoleCapsList();
+        ObservableList<RoleModel> roleList = getRoleCapsList();
         ObservableList<String> roleNameList =  FXCollections.observableArrayList();
 
         for ( int i=0; i< roleList.size(); i++ ){
@@ -227,16 +226,16 @@ public class UsersController extends ConfigurationController implements Initiali
             ArrayList<String> roles = new ArrayList<>();
             roles.add(usersComboRole.getValue().toString());
 
-            User user = new User(
+            UserModel userModel = new UserModel(
                     usersInputFirstname.getText(),
                     usersInputLastname.getText(),
                     usersInputUsername.getText(),
                     SignupController.hashPassword(usersInputPassword.getText()),
                     roles);
-            user.save(false, true);
+            userModel.save(false, true);
 
-            User userMetaSaved = new User( User.getUserByUsername(user.getUsername()).getUser_id(), roles );
-            User.setUserRole(dao, userMetaSaved);
+            UserModel userModelMetaSaved = new UserModel( UserModel.getUserByUsername(userModel.getUsername()).getUser_id(), roles );
+            UserModel.setUserRole(dao, userModelMetaSaved);
 
             showUsers(); // update table list view
         } else {
@@ -249,33 +248,33 @@ public class UsersController extends ConfigurationController implements Initiali
     @FXML
     private void BtnUpdateUserAction(ActionEvent event){
         DaoModel dao = new DaoModel();
-        User user = (User) usersTable.getSelectionModel().getSelectedItem();
+        UserModel userModel = (UserModel) usersTable.getSelectionModel().getSelectedItem();
 
-        user.setUser_id(Integer.parseInt(usersInputUserId.getText().strip()));
-        user.setFirstname(usersInputFirstname.getText().strip());
-        user.setLastname(usersInputLastname.getText().strip());
-        user.setUsername(usersInputUsername.getText().strip());
+        userModel.setUser_id(Integer.parseInt(usersInputUserId.getText().strip()));
+        userModel.setFirstname(usersInputFirstname.getText().strip());
+        userModel.setLastname(usersInputLastname.getText().strip());
+        userModel.setUsername(usersInputUsername.getText().strip());
         System.out.println("current user input password: " + usersInputPassword.getText().strip());
-        System.out.println("user object password: " + user.getPassword().strip());
-        if ( ! usersInputPassword.getText().strip().equals(user.getPassword().strip())){
+        System.out.println("user object password: " + userModel.getPassword().strip());
+        if ( ! usersInputPassword.getText().strip().equals(userModel.getPassword().strip())){
             System.out.println("password changed");
             System.out.println(" hashing new password: " + SignupController.hashPassword(usersInputPassword.getText().strip()));
-            user.setPassword(SignupController.hashPassword(usersInputPassword.getText().strip()));
+            userModel.setPassword(SignupController.hashPassword(usersInputPassword.getText().strip()));
         } else {
-            user.setPassword(usersInputPassword.getText().strip());
+            userModel.setPassword(usersInputPassword.getText().strip());
         }
 
 
-        user.save(true, false); // Update
+        userModel.save(true, false); // Update
 
         // User meta roles
         ArrayList<String> userRoles = new ArrayList<>();
         userRoles.add(usersComboRole.getValue().toString());
-        User userMetaSaved = new User(new User().getUserByUsername(user.getUsername()).getUser_id(), userRoles);
-        new User().setUserRole(dao, userMetaSaved);
+        UserModel userModelMetaSaved = new UserModel(new UserModel().getUserByUsername(userModel.getUsername()).getUser_id(), userRoles);
+        new UserModel().setUserRole(dao, userModelMetaSaved);
 
         // logout if downgrading current user from admin to user
-        if (usersComboRole.getValue().toString().contains("User") && Main.userLoggedIn.getUser_id() == Integer.parseInt(usersInputUserId.getText().strip()) ){
+        if (usersComboRole.getValue().toString().contains("User") && Main.userModelLoggedIn.getUser_id() == Integer.parseInt(usersInputUserId.getText().strip()) ){
             System.out.println("Downgraded to user role");
             System.out.println("Logging out now...");
             Main.logout(usersBtnUpdate); // pass in a btn from this scene to get current window
@@ -290,8 +289,8 @@ public class UsersController extends ConfigurationController implements Initiali
     private void BtnDeleteUserAction(ActionEvent event){
 
         if( confirmAction("delete this user?") ){
-            User user = (User) usersTable.getSelectionModel().getSelectedItem();
-            user.delete();
+            UserModel userModel = (UserModel) usersTable.getSelectionModel().getSelectedItem();
+            userModel.delete();
             usersBtnClear.fire(); // clear form
             showUsers(); // refresh users list
         }
@@ -302,12 +301,12 @@ public class UsersController extends ConfigurationController implements Initiali
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setHeaderText("Are you sure you want to " + action);
-        User user = (User) usersTable.getSelectionModel().getSelectedItem();
+        UserModel userModel = (UserModel) usersTable.getSelectionModel().getSelectedItem();
         alert.setContentText(
-                        "User ID: " + user.getUser_id() + "\n" +
-                        "Username: " + user.getUsername() + "\n" +
-                        "Firstname: " + user.getFirstname() + "\n" +
-                        "Lastname: " + user.getLastname() + "\n"
+                        "User ID: " + userModel.getUser_id() + "\n" +
+                        "Username: " + userModel.getUsername() + "\n" +
+                        "Firstname: " + userModel.getFirstname() + "\n" +
+                        "Lastname: " + userModel.getLastname() + "\n"
         );
 
         Optional<ButtonType> result = alert.showAndWait();
@@ -333,15 +332,15 @@ public class UsersController extends ConfigurationController implements Initiali
     @FXML
     private void tableViewClickedAction(MouseEvent event){
         try{
-            User user = (User) usersTable.getSelectionModel().getSelectedItem();
+            UserModel userModel = (UserModel) usersTable.getSelectionModel().getSelectedItem();
             // Populate the form inout TextFields
-            usersInputUserId.setText(String.valueOf(user.getUser_id()).strip());
+            usersInputUserId.setText(String.valueOf(userModel.getUser_id()).strip());
             usersInputUserId.setEditable(false); // Disable user_id field
-            usersInputFirstname.setText(user.getFirstname().strip());
-            usersInputLastname.setText(user.getLastname().strip());
-            usersInputUsername.setText(user.getUsername().strip());
-            usersInputPassword.setText(user.getPassword().strip());
-            usersComboRole.setValue(user.getRoles().get(0));
+            usersInputFirstname.setText(userModel.getFirstname().strip());
+            usersInputLastname.setText(userModel.getLastname().strip());
+            usersInputUsername.setText(userModel.getUsername().strip());
+            usersInputPassword.setText(userModel.getPassword().strip());
+            usersComboRole.setValue(userModel.getRoles().get(0));
         } catch ( NullPointerException e){
             System.out.println("Not users in clicked cell.");
             e.printStackTrace();

@@ -2,16 +2,16 @@ package models;
 
 import java.util.Vector;
 
-public class Role {
+public class RoleModel {
     private String role;
     private Vector<String> capabilities;
 
-    public Role(String role, Vector<String> capabilities) {
+    public RoleModel(String role, Vector<String> capabilities) {
         this.role = role;
         this.capabilities = capabilities;
     }
 
-    public Role() {
+    public RoleModel() {
 
     }
 
@@ -19,7 +19,7 @@ public class Role {
         return role;
     }
 
-    public Role setRole(String role) {
+    public RoleModel setRole(String role) {
         this.role = role;
         return this;
     }
@@ -28,7 +28,7 @@ public class Role {
         return capabilities;
     }
 
-    public Role setCapabilities(Vector<String> capabilities) {
+    public RoleModel setCapabilities(Vector<String> capabilities) {
         this.capabilities = capabilities;
         return this;
     }

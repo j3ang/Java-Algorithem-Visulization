@@ -4,22 +4,17 @@ package controllers;
 import application.Main;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
 import models.LoginModel;
-import models.User;
+import models.UserModel;
 
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -61,7 +56,7 @@ public class LoginController implements Initializable {
                         inputUsername.getText(),
                         SignupController.hashPassword( inputPassword.getText() ) )
                 ){
-                    Main.userLoggedIn = new User().getUserByUsername(inputUsername.getText());
+                    Main.userModelLoggedIn = new UserModel().getUserByUsername(inputUsername.getText());
                     nextScreen(evt);
 
 

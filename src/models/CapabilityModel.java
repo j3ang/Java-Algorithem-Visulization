@@ -4,25 +4,24 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Vector;
 
-public class Capability {
+public class CapabilityModel {
     private int cap_id;
     private String cap_name, cap_desc, cap_dt_created;
     DaoModel dao = new DaoModel();
     String capabilitiesTable = dao.getTableName("capabilities");
 
-    public Capability() {
+    public CapabilityModel() {
     }
 
-    public Capability( String cap_name, String cap_desc) {
+    public CapabilityModel(String cap_name, String cap_desc) {
         this.cap_name = cap_name;
         this.cap_desc = cap_desc;
     }
 
 
-    public Capability(int cap_id, String cap_name, String cap_desc, String cap_dt_created) {
+    public CapabilityModel(int cap_id, String cap_name, String cap_desc, String cap_dt_created) {
         this.cap_id = cap_id;
         this.cap_name = cap_name;
         this.cap_desc = cap_desc;
@@ -65,7 +64,7 @@ public class Capability {
         return cap_id;
     }
 
-    public Capability setCap_id(int cap_id) {
+    public CapabilityModel setCap_id(int cap_id) {
         this.cap_id = cap_id;
         return this;
     }
@@ -74,7 +73,7 @@ public class Capability {
         return cap_name;
     }
 
-    public Capability setCap_name(String cap_name) {
+    public CapabilityModel setCap_name(String cap_name) {
         this.cap_name = cap_name;
         return this;
     }
@@ -83,7 +82,7 @@ public class Capability {
         return cap_desc;
     }
 
-    public Capability setCap_desc(String cap_desc) {
+    public CapabilityModel setCap_desc(String cap_desc) {
         this.cap_desc = cap_desc;
         return this;
     }
@@ -92,7 +91,7 @@ public class Capability {
         return cap_dt_created;
     }
 
-    public Capability setCap_dt_created(String cap_dt_created) {
+    public CapabilityModel setCap_dt_created(String cap_dt_created) {
         this.cap_dt_created = cap_dt_created;
         return this;
     }

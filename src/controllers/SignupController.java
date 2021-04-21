@@ -11,7 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import models.DaoModel;
-import models.User;
+import models.UserModel;
 
 import java.net.URL;
 import java.util.HashMap;
@@ -62,12 +62,12 @@ public class SignupController implements Initializable  {
 
            DaoModel dao = new DaoModel();
 
-           User newUser = new User(
+           UserModel newUserModel = new UserModel(
                    form.get("Firstname").toString(),
                    form.get("Lastname").toString(),
                    form.get("Username").toString(),
                    form.get("Password").toString());
-           newUser.save(false, true);
+           newUserModel.save(false, true);
 
            signupMessage.setText("Your account has been created.");
            Parent parent = brandingImageView.getParent(); // the Parent (or Scene) that contains the TextFields

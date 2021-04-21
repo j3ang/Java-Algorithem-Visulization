@@ -11,7 +11,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import models.User;
+import models.UserModel;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -31,21 +31,21 @@ public class ConfigurationController implements Initializable  {
     }
 
     public SplitMenuButton setUpLoggedInUser(){
-        User userLoggedIn = Main.userLoggedIn;
+        UserModel userModelLoggedIn = Main.userModelLoggedIn;
 
         Text roleText  = (Text) loggedinUserVBox.lookup("#" + loggedinUserVBox.getChildren().get(0).getId());
-        roleText.setText( userLoggedIn.getRoles().get(0) );
+        roleText.setText( userModelLoggedIn.getRoles().get(0) );
 
         SplitMenuButton m  = (SplitMenuButton)loggedinUserVBox.lookup("#" + loggedinUserVBox.getChildren().get(1).getId());
-        String fullname = userLoggedIn.getFirstname() + " " + userLoggedIn.getLastname();
+        String fullname = userModelLoggedIn.getFirstname() + " " + userModelLoggedIn.getLastname();
         m.setText(fullname);
 
         System.out.println(
                 "ConfigurationController.setUpLoggedInUser(): " +
                         "\n" + "Fullname: " + fullname  +
-                        "\n" + "User ID: " + userLoggedIn.getUser_id() +
-                        "\n" + "username: " + userLoggedIn.getUsername() +
-                        "\n" + "Role: " + userLoggedIn.getRoles() );
+                        "\n" + "User ID: " + userModelLoggedIn.getUser_id() +
+                        "\n" + "username: " + userModelLoggedIn.getUsername() +
+                        "\n" + "Role: " + userModelLoggedIn.getRoles() );
 
         return m;
 
@@ -85,7 +85,7 @@ public class ConfigurationController implements Initializable  {
 
         // Could use capabilities for more flexibility
         // Restricting admin vs. user view
-        if ( !Main.userLoggedIn.getRoles().get(0).equals("Administrator") && !Main.userLoggedIn.getRoles().get(0).equals("Manager") ){
+        if ( !Main.userModelLoggedIn.getRoles().get(0).equals("Administrator") && !Main.userModelLoggedIn.getRoles().get(0).equals("Manager") ){
             users.setVisible(false);
         }
 

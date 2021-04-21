@@ -1,7 +1,6 @@
 package application;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -18,9 +17,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.WindowEvent;
 import models.DaoModel;
-import models.User;
+import models.UserModel;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,7 +31,7 @@ public class Main extends Application {
 
     private static double xOffset = 0;
     private static double yOffset = 0;
-    public static User userLoggedIn;
+    public static UserModel userModelLoggedIn;
 
     @FXML
     public static SplitMenuButton splitMenuButton;

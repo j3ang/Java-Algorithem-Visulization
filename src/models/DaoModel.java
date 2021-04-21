@@ -1,7 +1,6 @@
 package models;
 
 
-import application.Main;
 import com.google.gson.Gson;
 import controllers.SignupController;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -160,7 +159,7 @@ public class DaoModel<T> {
         if ( !rowExists(getTableName("users"), "user_id", dotenv.get("ADMIN_ID")) ){
             if (!rowExists(getTableName("users"), "user_id", dotenv.get("ADMIN_ID")) ){
                 // Create root user if not exist
-                User admin = new User(Integer.parseInt(dotenv.get("ADMIN_ID")),
+                UserModel admin = new UserModel(Integer.parseInt(dotenv.get("ADMIN_ID")),
                         dotenv.get("ADMIN_FIRSTNAME"),
                         dotenv.get("ADMIN_LASTNAME"),
                         dotenv.get("ADMIN_USERNAME"),
@@ -172,22 +171,22 @@ public class DaoModel<T> {
             // Can create, read, update, delete users
             // Can create, read, update, delete activity history
             if (!rowExists(getTableName("capabilities"), "cap_name", "can_create_user")){
-                new Capability("can_create_user", "can create new user").add();
-                new Capability("can_read_user", "can retrieve and view list of users").add();
-                new Capability("can_update_user", "can modify and save user data").add();
-                new Capability("can_delete_user", "can delete user").add();
+                new CapabilityModel("can_create_user", "can create new user").add();
+                new CapabilityModel("can_read_user", "can retrieve and view list of users").add();
+                new CapabilityModel("can_update_user", "can modify and save user data").add();
+                new CapabilityModel("can_delete_user", "can delete user").add();
 
-                new Capability("can_create_history", "can create history record").add();
-                new Capability("can_read_history", "can retrieve and view list of history records").add();
-                new Capability("can_update_history", "can modify and update history records").add();
-                new Capability("can_delete_history", "can delete history records").add();
+                new CapabilityModel("can_create_history", "can create history record").add();
+                new CapabilityModel("can_read_history", "can retrieve and view list of history records").add();
+                new CapabilityModel("can_update_history", "can modify and update history records").add();
+                new CapabilityModel("can_delete_history", "can delete history records").add();
             }
 
             // Add Admin role in options table
 
             if (! rowExists(getTableName("options"), "option_key", "role_capabilities") ){
                 // Get all capabilities inserted above
-                Vector<Vector<Object>> capData = readData(new Capability().getAllCapabilities(), getTableName("capabilities"));
+                Vector<Vector<Object>> capData = readData(new CapabilityModel().getAllCapabilities(), getTableName("capabilities"));
 
                 // Assign capabilities to admin role
                 Vector adminCaps = new Vector();
@@ -202,8 +201,8 @@ public class DaoModel<T> {
                 userCaps.add("can_delete_history");
 
                 // Create new admin and user roles
-                Role admin = new Role("Administrator", adminCaps);
-                Role user = new Role("User", userCaps);
+                RoleModel admin = new RoleModel("Administrator", adminCaps);
+                RoleModel user = new RoleModel("User", userCaps);
 
                 // The role_capabilities option value contains the list of role cap pairs
                 HashMap<String, Vector> role_cap = new HashMap<>();
@@ -211,12 +210,12 @@ public class DaoModel<T> {
                 role_cap.put( user.getRole(), user.getCapabilities() );
 
                 // Save Option
-                Option option = new Option("role_capabilities", role_cap );
-                option.save(false);
+                OptionModel optionModel = new OptionModel("role_capabilities", role_cap );
+                optionModel.save(false);
 
 
-                System.out.println("saved option " + option.getOption_key() );
-                System.out.println("option value: " + option.getOption_value() );
+                System.out.println("saved option " + optionModel.getOption_key() );
+                System.out.println("option value: " + optionModel.getOption_value() );
 
             }
 
@@ -229,7 +228,7 @@ public class DaoModel<T> {
                 Gson gson = new Gson();
                 String rolesJson = gson.toJson(roles);
 
-                Usermeta adminMeta = new Usermeta( Integer.parseInt(dotenv.get("ADMIN_ID")), "user_roles",  rolesJson );
+                UsermetaModel adminMeta = new UsermetaModel( Integer.parseInt(dotenv.get("ADMIN_ID")), "user_roles",  rolesJson );
                 adminMeta.save(false);
             }
 

@@ -9,7 +9,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 
-public class Option {
+public class OptionModel {
 
     private int option_id;
     private String option_key;
@@ -17,23 +17,23 @@ public class Option {
     private final String optionsTable = new DaoModel<>().tablePrefix + "options";
 
 
-    public Option() {
+    public OptionModel() {
     }
 
-    public Vector<Role> decodeOptionValue(String json){
+    public Vector<RoleModel> decodeOptionValue(String json){
 
-        Vector<Role> roles = new Vector<>();
+        Vector<RoleModel> roleModels = new Vector<>();
 
         Type listType = new TypeToken<HashMap<String, Vector>>(){}.getType();
         HashMap<String, Vector> role_caps = new Gson().fromJson(json, listType);
         for (Map.Entry<String, Vector> entry : role_caps.entrySet()) {
             String key = entry.getKey();
             Vector value = entry.getValue();
-            roles.add(new Role(key, value));
+            roleModels.add(new RoleModel(key, value));
             System.out.println("Option.decodeOptionValue(): " + key + ": " + value );
         }
 
-        return roles;
+        return roleModels;
     }
 
     public void save(Boolean includeId) {
@@ -56,10 +56,10 @@ public class Option {
 
     }
 
-    public Vector<Role> getRoleCapOption(String optionKey){
+    public Vector<RoleModel> getRoleCapOption(String optionKey){
         DaoModel dao = new DaoModel();
         ResultSet rs = null;
-        Vector<Role> decoded_role_caps = new Vector<>();
+        Vector<RoleModel> decoded_role_caps = new Vector<>();
 
         String sql = dao.prepareSelectStmt(dao.getTableName("options"), "option_key='" + optionKey + "'");
 
@@ -85,12 +85,12 @@ public class Option {
     }
 
 
-    public Option(String option_key, HashMap<String, Vector> option_value) {
+    public OptionModel(String option_key, HashMap<String, Vector> option_value) {
         this.option_key = option_key;
         this.option_value = option_value;
     }
 
-    public Option(int option_id, String option_key, HashMap<String, Vector> option_value) {
+    public OptionModel(int option_id, String option_key, HashMap<String, Vector> option_value) {
         this.option_id = option_id;
         this.option_key = option_key;
         this.option_value = option_value;
@@ -100,7 +100,7 @@ public class Option {
         return option_id;
     }
 
-    public Option setOption_id(int option_id) {
+    public OptionModel setOption_id(int option_id) {
         this.option_id = option_id;
         return this;
     }
@@ -109,7 +109,7 @@ public class Option {
         return option_key;
     }
 
-    public Option setOption_key(String option_key) {
+    public OptionModel setOption_key(String option_key) {
         this.option_key = option_key;
         return this;
     }
@@ -118,7 +118,7 @@ public class Option {
         return option_value;
     }
 
-    public Option setOption_value(HashMap<String, Vector> option_value) {
+    public OptionModel setOption_value(HashMap<String, Vector> option_value) {
         this.option_value = option_value;
         return this;
     }
