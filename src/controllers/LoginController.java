@@ -1,0 +1,93 @@
+package controllers;
+
+
+import application.Main;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+import models.LoginModel;
+import models.User;
+
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+
+public class LoginController implements Initializable {
+
+    @FXML
+    private ImageView brandingImageView;
+    @FXML
+    private Label loginMessage;
+    @FXML
+    private Button btnLogin;
+    @FXML
+    private Button btnSignUp;
+
+    @FXML
+    private TextField inputUsername;
+    @FXML
+    private TextField inputPassword;
+
+    private Scene signupScene;
+    private Scene configurationScene;
+
+
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+
+        Main.showImage("assets/img/algoViz_login.jpg", brandingImageView);
+    }
+
+
+
+    public void loginBtnOnAction(ActionEvent evt){
+        if ( inputUsername.getText().isBlank() == false && inputPassword.getText().isBlank() == false  ){
+            loginMessage.setText("Logging in...");
+
+            try{
+                LoginModel loginModel = new LoginModel();
+
+                if ( loginModel.login(
+                        inputUsername.getText(),
+                        SignupController.hashPassword( inputPassword.getText() ) )
+                ){
+                    Main.userLoggedIn = new User().getUserByUsername(inputUsername.getText());
+                    nextScreen(evt);
+
+
+                }
+                else
+                    loginMessage.setText("Credentials not found in database, try again...");
+
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+        } else {
+            loginMessage.setText("Please enter username and password.");
+        }
+
+    }
+
+
+    public void signupBtnOnAction(ActionEvent evt){
+        Main.loadScene(evt, "signup", false);
+    }
+
+
+    public void nextScreen(ActionEvent evt){
+        Main.loadScene(evt, "configuration", false);
+    }
+
+
+}
