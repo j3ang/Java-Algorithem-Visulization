@@ -76,8 +76,9 @@ public class ConfigurationController implements Initializable  {
         for(int i=0; i< m.getItems().size(); i++){
             int finalI = i;
             m.getItems().get(i).setOnAction((e)->{
-                System.out.println("Menuitem " + finalI + " clicked");
+                System.out.println("==============================================");
                 System.out.println("Loading " + btnLoadScenes.get(finalI) + ".fxml");
+                System.out.println("==============================================");
                 Main.loadScene(e,   btnLoadScenes.get(finalI) , true);
             });
         }

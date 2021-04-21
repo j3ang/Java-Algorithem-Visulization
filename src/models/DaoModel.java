@@ -1,6 +1,7 @@
 package models;
 
 
+import application.Main;
 import com.google.gson.Gson;
 import controllers.SignupController;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -15,6 +16,7 @@ public class DaoModel<T> {
     DbConnect conn = null;
     Dotenv dotenv = Dotenv.load();
     String tablePrefix = dotenv.get("DB_PREFIX");
+
 
     public DbConnect getConnection(){
         return conn;
@@ -59,175 +61,180 @@ public class DaoModel<T> {
 
     // CREATE TABLE METHOD
     public void createTable() {
-        // Create tables
-        for (String tableName : tableNames) {
-            // Option table where user roles are stored
-            if (tableName.contains("options")){
-                // Prepare statement
-                String algorithmsSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
-                        "(option_id INTEGER not NULL AUTO_INCREMENT, " +
-                        " option_key VARCHAR(50), " +
-                        " option_value TEXT, " +
-                        " PRIMARY KEY ( option_id ))";
+        if (  !rowExists(getTableName("users"), "user_id", dotenv.get("ADMIN_ID")) ){
+            // Create tables
+            for (String tableName : tableNames) {
+                // Option table where user roles are stored
+                if (tableName.contains("options")){
+                    // Prepare statement
+                    String algorithmsSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
+                            "(option_id INTEGER not NULL AUTO_INCREMENT, " +
+                            " option_key VARCHAR(50), " +
+                            " option_value TEXT, " +
+                            " PRIMARY KEY ( option_id ))";
 
-                // Execute prepared statement
-                executeStatement(tableName, algorithmsSQL);
+                    // Execute prepared statement
+                    executeStatement(tableName, algorithmsSQL);
+                }
+
+                // where capabilities are stored and can be added to user roles
+                if (tableName.contains("capabilities")){
+                    // Prepare statement
+                    String capabilitiesSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
+                            "(cap_id INTEGER not NULL AUTO_INCREMENT, " +
+                            " cap_name VARCHAR(100), " +
+                            " cap_desc VARCHAR(100), " +
+                            " cap_dt_created TIMESTAMP NOT NULL, " +
+                            " PRIMARY KEY ( cap_id ))";
+
+                    // Execute prepared statement
+                    executeStatement(tableName, capabilitiesSQL);
+                }
+
+
+                if (tableName.contains("algorithms")){
+                    // Prepare statement
+                    String algorithmsSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
+                            "(algo_id INTEGER not NULL AUTO_INCREMENT, " +
+                            " algo_name VARCHAR(50), " +
+                            " algo_desc VARCHAR(100), " +
+                            " algo_dt_created TIMESTAMP NOT NULL, " +
+                            " PRIMARY KEY ( algo_id ))";
+
+                    // Execute prepared statement
+                    executeStatement(tableName, algorithmsSQL);
+                }
+
+
+
+                if (tableName.contains("users")){
+                    // Prepare statement to execute
+                    String usersSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
+                            "(user_id INTEGER not NULL AUTO_INCREMENT, " +
+                            " firstname VARCHAR(30), " +
+                            " lastname VARCHAR(30), " +
+                            " username VARCHAR(30), " +
+                            " password VARCHAR(64), " +
+                            " dt_created TIMESTAMP NOT NULL, " +
+                            " PRIMARY KEY ( user_id ))";
+
+                    // Execute create query
+                    executeStatement(tableName, usersSQL);
+                }
+
+                if (tableName.contains("activities")){
+                    // Prepare statement to execute
+                    String activitiesSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
+                            "(act_id INTEGER not NULL AUTO_INCREMENT, " +
+                            " user_id INTEGER not NULL, " +
+                            " act_dt_created TIMESTAMP NOT NULL, " +
+                            " act_info TEXT, " +
+                            " PRIMARY KEY ( act_id ), " +
+                            " FOREIGN KEY (user_id) REFERENCES " + tablePrefix + "users(user_id))";
+
+                    // Execute create query
+                    executeStatement(tableName, activitiesSQL);
+                }
+
+                if (tableName.contains("usermeta")){
+                    // Prepare statement to execute
+                    String activitiesSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
+                            "(meta_id INTEGER not NULL AUTO_INCREMENT, " +
+                            " user_id INTEGER not NULL, " +
+                            " meta_name VARCHAR(50), " +
+                            " meta_desc VARCHAR(100), " +
+                            " PRIMARY KEY ( meta_id ), " +
+                            " FOREIGN KEY (user_id) REFERENCES " + tablePrefix + "users(user_id))";
+
+                    // Execute create query
+                    executeStatement(tableName, activitiesSQL);
+                }
+
             }
-
-            // where capabilities are stored and can be added to user roles
-            if (tableName.contains("capabilities")){
-                // Prepare statement
-                String capabilitiesSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
-                        "(cap_id INTEGER not NULL AUTO_INCREMENT, " +
-                        " cap_name VARCHAR(100), " +
-                        " cap_desc VARCHAR(100), " +
-                        " cap_dt_created TIMESTAMP NOT NULL, " +
-                        " PRIMARY KEY ( cap_id ))";
-
-                // Execute prepared statement
-                executeStatement(tableName, capabilitiesSQL);
-            }
-
-
-            if (tableName.contains("algorithms")){
-                // Prepare statement
-                String algorithmsSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
-                        "(algo_id INTEGER not NULL AUTO_INCREMENT, " +
-                        " algo_name VARCHAR(50), " +
-                        " algo_desc VARCHAR(100), " +
-                        " algo_dt_created TIMESTAMP NOT NULL, " +
-                        " PRIMARY KEY ( algo_id ))";
-
-                // Execute prepared statement
-                executeStatement(tableName, algorithmsSQL);
-            }
-
-
-
-            if (tableName.contains("users")){
-                // Prepare statement to execute
-                String usersSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
-                        "(user_id INTEGER not NULL AUTO_INCREMENT, " +
-                        " firstname VARCHAR(30), " +
-                        " lastname VARCHAR(30), " +
-                        " username VARCHAR(30), " +
-                        " password VARCHAR(64), " +
-                        " dt_created TIMESTAMP NOT NULL, " +
-                        " PRIMARY KEY ( user_id ))";
-
-                // Execute create query
-                executeStatement(tableName, usersSQL);
-            }
-
-            if (tableName.contains("activities")){
-                // Prepare statement to execute
-                String activitiesSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
-                        "(act_id INTEGER not NULL AUTO_INCREMENT, " +
-                        " user_id INTEGER not NULL, " +
-                        " act_dt_created TIMESTAMP NOT NULL, " +
-                        " act_info TEXT, " +
-                        " PRIMARY KEY ( act_id ), " +
-                        " FOREIGN KEY (user_id) REFERENCES " + tablePrefix + "users(user_id))";
-
-                // Execute create query
-                executeStatement(tableName, activitiesSQL);
-            }
-
-            if (tableName.contains("usermeta")){
-                // Prepare statement to execute
-                String activitiesSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
-                        "(meta_id INTEGER not NULL AUTO_INCREMENT, " +
-                        " user_id INTEGER not NULL, " +
-                        " meta_name VARCHAR(50), " +
-                        " meta_desc VARCHAR(100), " +
-                        " PRIMARY KEY ( meta_id ), " +
-                        " FOREIGN KEY (user_id) REFERENCES " + tablePrefix + "users(user_id))";
-
-                // Execute create query
-                executeStatement(tableName, activitiesSQL);
-            }
-
         }
-
 
     }
 
     public void setupRoot(){
 
-        // Create root user if not exist
-        if (! rowExists(getTableName("users"), "user_id", dotenv.get("ADMIN_ID")) ){
-            User admin = new User(Integer.parseInt(dotenv.get("ADMIN_ID")),
-                    dotenv.get("ADMIN_FIRSTNAME"),
-                    dotenv.get("ADMIN_LASTNAME"),
-                    dotenv.get("ADMIN_USERNAME"),
-                    SignupController.hashPassword(dotenv.get("ADMIN_PASS")));
-            admin.save(true, true);
-        }
-
-        // Create default capabilities
-        // Can create, read, update, delete users
-        // Can create, read, update, delete activity history
-        if (!rowExists(getTableName("capabilities"), "cap_name", "can_create_user")){
-            new Capability("can_create_user", "can create new user").add();
-            new Capability("can_read_user", "can retrieve and view list of users").add();
-            new Capability("can_update_user", "can modify and save user data").add();
-            new Capability("can_delete_user", "can delete user").add();
-
-            new Capability("can_create_history", "can create history record").add();
-            new Capability("can_read_history", "can retrieve and view list of history records").add();
-            new Capability("can_update_history", "can modify and update history records").add();
-            new Capability("can_delete_history", "can delete history records").add();
-        }
-
-        // Add Admin role in options table
-
-        if (! rowExists(getTableName("options"), "option_key", "role_capabilities") ){
-            // Get all capabilities inserted above
-            Vector<Vector<Object>> capData = readData(new Capability().getAllCapabilities(), getTableName("capabilities"));
-
-            // Assign capabilities to admin role
-            Vector adminCaps = new Vector<>();
-            for( int r=0; r<capData.size(); r++){
-                adminCaps.add(capData.get(r).get(1));  // all capabilities available
+        if ( !rowExists(getTableName("users"), "user_id", dotenv.get("ADMIN_ID")) ){
+            if (!rowExists(getTableName("users"), "user_id", dotenv.get("ADMIN_ID")) ){
+                // Create root user if not exist
+                User admin = new User(Integer.parseInt(dotenv.get("ADMIN_ID")),
+                        dotenv.get("ADMIN_FIRSTNAME"),
+                        dotenv.get("ADMIN_LASTNAME"),
+                        dotenv.get("ADMIN_USERNAME"),
+                        SignupController.hashPassword(dotenv.get("ADMIN_PASS")));
+                admin.save(true, true);
             }
 
-            // Assign capabilities to user role
-            Vector<String> userCaps = new Vector<>();
-            userCaps.add("can_create_history");
-            userCaps.add("can_read_history");
-            userCaps.add("can_delete_history");
+            // Create default capabilities
+            // Can create, read, update, delete users
+            // Can create, read, update, delete activity history
+            if (!rowExists(getTableName("capabilities"), "cap_name", "can_create_user")){
+                new Capability("can_create_user", "can create new user").add();
+                new Capability("can_read_user", "can retrieve and view list of users").add();
+                new Capability("can_update_user", "can modify and save user data").add();
+                new Capability("can_delete_user", "can delete user").add();
 
-            // Create new admin and user roles
-            Role admin = new Role("Administrator", adminCaps);
-            Role user = new Role("User", userCaps);
+                new Capability("can_create_history", "can create history record").add();
+                new Capability("can_read_history", "can retrieve and view list of history records").add();
+                new Capability("can_update_history", "can modify and update history records").add();
+                new Capability("can_delete_history", "can delete history records").add();
+            }
 
-            // The role_capabilities option value contains the list of role cap pairs
-            HashMap<String, Vector> role_cap = new HashMap<>();
-            role_cap.put( admin.getRole(), admin.getCapabilities() );
-            role_cap.put( user.getRole(), user.getCapabilities() );
+            // Add Admin role in options table
 
-            // Save Option
-            Option option = new Option("role_capabilities", role_cap );
-            option.save(false);
+            if (! rowExists(getTableName("options"), "option_key", "role_capabilities") ){
+                // Get all capabilities inserted above
+                Vector<Vector<Object>> capData = readData(new Capability().getAllCapabilities(), getTableName("capabilities"));
+
+                // Assign capabilities to admin role
+                Vector adminCaps = new Vector();
+                for( Object cap : capData ){
+                    adminCaps.add(cap);  // all capabilities available
+                }
+
+                // Assign capabilities to user role
+                Vector<String> userCaps = new Vector<>();
+                userCaps.add("can_create_history");
+                userCaps.add("can_read_history");
+                userCaps.add("can_delete_history");
+
+                // Create new admin and user roles
+                Role admin = new Role("Administrator", adminCaps);
+                Role user = new Role("User", userCaps);
+
+                // The role_capabilities option value contains the list of role cap pairs
+                HashMap<String, Vector> role_cap = new HashMap<>();
+                role_cap.put( admin.getRole(), admin.getCapabilities() );
+                role_cap.put( user.getRole(), user.getCapabilities() );
+
+                // Save Option
+                Option option = new Option("role_capabilities", role_cap );
+                option.save(false);
 
 
-            System.out.println("saved option " + option.getOption_key() );
-            System.out.println("option value: " + option.getOption_value() );
+                System.out.println("saved option " + option.getOption_key() );
+                System.out.println("option value: " + option.getOption_value() );
+
+            }
+
+            // Assign role to User in Usermeta table
+            // Create root user
+            if (! rowExists(getTableName("usermeta"), "user_id", dotenv.get("ADMIN_ID")) ){
+                ArrayList<String> roles  = new ArrayList<>();
+                roles.add("Administrator");
+
+                Gson gson = new Gson();
+                String rolesJson = gson.toJson(roles);
+
+                Usermeta adminMeta = new Usermeta( Integer.parseInt(dotenv.get("ADMIN_ID")), "user_roles",  rolesJson );
+                adminMeta.save(false);
+            }
 
         }
 
-        // Assign role to User in Usermeta table
-        // Create root user
-        if (! rowExists(getTableName("usermeta"), "user_id", "999999") ){
-            ArrayList<String> roles  = new ArrayList<>();
-            roles.add("Administrator");
-
-            Gson gson = new Gson();
-            String rolesJson = gson.toJson(roles);
-
-            Usermeta adminMeta = new Usermeta( 999999, "user_roles",  rolesJson );
-            adminMeta.save(false);
-        }
 
     }
 
@@ -311,7 +318,6 @@ public class DaoModel<T> {
 
             }
 
-//            System.out.println("DaoModel.readData(): " + tableName + ": " + data);
             rs.close(); //close ResultSet instance
         } catch (SQLException e) { e.printStackTrace(); }
 

@@ -51,7 +51,7 @@ public class Capability {
         String sql = "select * from " + capabilitiesTable;
 
         try{
-            PreparedStatement sqlstmt = dao.conn.connect().prepareStatement(sql);
+            PreparedStatement sqlstmt = new DbConnect().connect().prepareStatement(sql);
             rs = sqlstmt.executeQuery(sql);
 
         } catch (SQLException se){

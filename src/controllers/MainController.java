@@ -20,8 +20,6 @@ public class MainController extends ConfigurationController implements Initializ
     @FXML
     private ImageView avatarImageView;
 
-    private Scene configurationScene;
-
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         Main.showImage("assets/img/avatar.png", avatarImageView);
@@ -29,7 +27,6 @@ public class MainController extends ConfigurationController implements Initializ
 
 
     public void mainStartNewBtnOnAction(ActionEvent evt) {
-        System.out.println("main start new btn clicked");
         Main.loadScene(evt, "configuration", false);
     }
 

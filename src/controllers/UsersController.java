@@ -332,17 +332,21 @@ public class UsersController extends ConfigurationController implements Initiali
 
     @FXML
     private void tableViewClickedAction(MouseEvent event){
-        System.out.println("table clicked!");
-        User user = (User) usersTable.getSelectionModel().getSelectedItem();
+        try{
+            User user = (User) usersTable.getSelectionModel().getSelectedItem();
+            // Populate the form inout TextFields
+            usersInputUserId.setText(String.valueOf(user.getUser_id()).strip());
+            usersInputUserId.setEditable(false); // Disable user_id field
+            usersInputFirstname.setText(user.getFirstname().strip());
+            usersInputLastname.setText(user.getLastname().strip());
+            usersInputUsername.setText(user.getUsername().strip());
+            usersInputPassword.setText(user.getPassword().strip());
+            usersComboRole.setValue(user.getRoles().get(0));
+        } catch ( NullPointerException e){
+            System.out.println("Not users in clicked cell.");
+            e.printStackTrace();
+        }
 
-        // Populate the form inout TextFields
-        usersInputUserId.setText(String.valueOf(user.getUser_id()).strip());
-        usersInputUserId.setEditable(false); // Disable user_id field
-        usersInputFirstname.setText(user.getFirstname().strip());
-        usersInputLastname.setText(user.getLastname().strip());
-        usersInputUsername.setText(user.getUsername().strip());
-        usersInputPassword.setText(user.getPassword().strip());
-        usersComboRole.setValue(user.getRoles().get(0));
     }
 
 }

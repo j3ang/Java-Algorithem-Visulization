@@ -38,6 +38,7 @@ public class Main extends Application {
     @FXML
     public static SplitMenuButton splitMenuButton;
 
+
     // Main
     public static void main(String[] args) {
         DaoModel dao = new DaoModel();
@@ -48,8 +49,8 @@ public class Main extends Application {
 
     @FXML
     public static void showImage(String pathname, ImageView imageView) {
+        System.out.println("main.showImage(): Setting Branding Image View");
         try {
-            System.out.println("main.showImage(): Setting Branding Image View");
             File brandingImageFile = new File(pathname);
             Image image = new Image(brandingImageFile.toURI().toString());
             imageView.setImage(image);
