@@ -47,7 +47,7 @@ public class Main extends Application {
 
     @FXML
     public static void showImage(String pathname, ImageView imageView) {
-        System.out.println("main.showImage(): Setting Branding Image View");
+        System.out.println("main.showImage(): " + imageView);
         try {
             File brandingImageFile = new File(pathname);
             Image image = new Image(brandingImageFile.toURI().toString());

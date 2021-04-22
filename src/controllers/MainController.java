@@ -17,12 +17,13 @@ import java.util.ResourceBundle;
 
 public class MainController extends ConfigurationController implements Initializable {
 
-    @FXML
-    private ImageView avatarImageView;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        Main.showImage("assets/img/avatar.png", avatarImageView);
+        initData();
+
+
+
     }
 
 

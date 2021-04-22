@@ -39,11 +39,8 @@ public class LoginController implements Initializable {
 
 
     public void initialize(URL url, ResourceBundle resourceBundle) {
-
         Main.showImage("assets/img/algoViz_login.jpg", brandingImageView);
     }
-
-
 
     public void loginBtnOnAction(ActionEvent evt){
         if ( inputUsername.getText().isBlank() == false && inputPassword.getText().isBlank() == false  ){
