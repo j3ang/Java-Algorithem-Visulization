@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.SplitMenuButton?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -98,13 +99,46 @@
                </padding>
             </VBox>
             <Line endX="-100.00199890136719" endY="208.4350128173828" startX="-100.00204467773438" startY="633.5858154296875" stroke="#dddcdc" />
-            <VBox prefHeight="523.0" prefWidth="543.0">
+            <VBox prefHeight="523.0" prefWidth="479.0" spacing="20.0">
                <children>
                   <Label text="2. Parameters">
                      <font>
                         <Font size="24.0" />
                      </font>
                   </Label>
+                  <HBox prefHeight="241.0" prefWidth="407.0">
+                     <children>
+                        <VBox alignment="CENTER" prefHeight="241.0" prefWidth="78.0" spacing="100.0">
+                           <children>
+                              <Label contentDisplay="RIGHT" prefHeight="17.0" prefWidth="142.0" text="Numbers" textAlignment="RIGHT" VBox.vgrow="ALWAYS">
+                                 <font>
+                                    <Font name="Open Sans Bold" size="13.0" />
+                                 </font></Label>
+                              <Label prefHeight="17.0" prefWidth="179.0" text="Speed" textAlignment="JUSTIFY">
+                                 <font>
+                                    <Font name="Open Sans Bold" size="13.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <VBox fx:id="configs" alignment="CENTER" prefHeight="241.0" prefWidth="331.0" spacing="60.0">
+                           <children>
+                              <AnchorPane fx:id="configsAnchor" prefHeight="201.0" prefWidth="256.0">
+                                 <children>
+
+                                    <Slider fx:id="configNumbers" layoutX="-2.0" layoutY="35.0" prefHeight="16.0" prefWidth="290.0" />
+                                    <Slider fx:id="configSpeed" layoutX="-2.0" layoutY="150.0" prefHeight="16.0" prefWidth="290.0" />
+                                    <Text fx:id="configNumbersIndicator" layoutX="138.0" layoutY="19.0" strokeType="OUTSIDE" strokeWidth="0.0" text="10" textAlignment="CENTER" />
+                                    <Text fx:id="configSpeedIndicator" layoutX="126.0" layoutY="131.0" strokeType="OUTSIDE" strokeWidth="0.0" text="0.001s" textAlignment="CENTER" />
+                                 </children>
+                              </AnchorPane>
+                           </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
+                        </VBox>
+                     </children>
+                  </HBox>
                </children>
                <padding>
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
@@ -112,5 +146,6 @@
             </VBox>
          </children>
       </HBox>
+      <Button fx:id="configurationRunBtn" layoutX="1041.0" layoutY="749.0" mnemonicParsing="false" onAction="#runAction" text="Run" />
    </children>
 </AnchorPane>
