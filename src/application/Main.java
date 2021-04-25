@@ -1,5 +1,6 @@
 package application;
 
+import controllers.MainController;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -26,7 +27,8 @@ import java.io.IOException;
 
 public class Main extends Application {
 
-    Stage window;
+
+    public static Stage window;
 
 
     private static double xOffset = 0;
@@ -122,6 +124,8 @@ public class Main extends Application {
         } catch (IOException e){
             e.printStackTrace();
         }
+
+
 
         return  loader.getController();
     }

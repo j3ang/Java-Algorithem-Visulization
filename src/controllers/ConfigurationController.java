@@ -5,20 +5,26 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Slider;
 import javafx.scene.control.SplitMenuButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import models.ConfigModel;
+import models.Session;
 import models.UserModel;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
@@ -32,18 +38,17 @@ public class ConfigurationController implements Initializable  {
     @FXML
     private VBox vTop;
     @FXML
-    private VBox configs;
-    @FXML
     private AnchorPane configsAnchor;
 
-
-
-
+    ConfigModel sessionConfig;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initData();
-        setUpParams(new ConfigModel());
+        Session  session = Session.getInstace(new ConfigModel());
+        sessionConfig = session.getConfig();
+        System.out.println(session);
+        setUpParams(sessionConfig);
 
     }
 
@@ -61,8 +66,9 @@ public class ConfigurationController implements Initializable  {
 
                         // Set default value
                         Text indicator = ((Text)configsAnchor.lookup("#configNumbersIndicator"));
-                        indicator.setText(String.valueOf(config.getNumbers()));
-                        numbersSlider.setValue(config.getNumbers());
+                        indicator.setText(String.valueOf(config.getNumbersSize()));
+                        numbersSlider.setValue(config.getNumbersSize());
+
 
                         // config number slider event listener
                         numbersSlider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -70,7 +76,8 @@ public class ConfigurationController implements Initializable  {
                             public void changed(ObservableValue<? extends Number> observableValue, Number initValue, Number newValue) {
                                 int currentNumbers = newValue.intValue();
                                 System.out.println("Slider " + id + " value changed:" + currentNumbers);
-                               indicator.setText(String.valueOf(currentNumbers));
+                                indicator.setText(String.valueOf(currentNumbers)); // update indicator numbers
+                                sessionConfig.setNumbersSize(currentNumbers);          // update session config numbers
                             }
                         });
 
@@ -92,8 +99,10 @@ public class ConfigurationController implements Initializable  {
                         speedSlider.valueProperty().addListener(new ChangeListener<Number>() {
                             @Override
                             public void changed(ObservableValue<? extends Number> observableValue, Number initValue, Number newValue) {
-                                System.out.println("Slider " + id + " value changed:" + newValue);
-                                inidcator.setText(String.valueOf(Math.round(newValue.doubleValue() * 1000.0)/1000.0));
+                                double currentIntervalSpeed = Math.round(newValue.doubleValue() * 1000.0)/1000.0;
+                                System.out.println("Slider " + id + " value changed:" + currentIntervalSpeed);
+                                inidcator.setText(String.valueOf(currentIntervalSpeed)); // update indicator speed interval
+                                sessionConfig.setSpeedInterval(currentIntervalSpeed);    // update session config speed interval
                             }
                         });
 
@@ -138,7 +147,6 @@ public class ConfigurationController implements Initializable  {
     public void initData() {
 
         Main.showImage("assets/img/avatar.png", avatarImageView);
-
         SplitMenuButton m = setUpLoggedInUser();
 
         // Create Menu Items programmatically
@@ -195,9 +203,20 @@ public class ConfigurationController implements Initializable  {
 
     }
 
+    public void runAction(ActionEvent evt) throws IOException {
+        MainController m = (MainController) Main.loadScene(evt, "main", false);
 
-    public void runAction(ActionEvent evt){
-        Main.loadScene(evt, "main", false);
+//        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/main.fxml"));
+//        Parent root = (Parent)loader.load();
+//        MainController controller = (MainController)loader.getController();
+//        Button btn = new Button();
+//       Stage stage = new Stage();
+//        StackPane stackPane = new StackPane();
+//        stackPane.getChildren().add(btn);
+//        stage.setScene(new Scene(stackPane, 300, 250));
+//        controller.setStage(stage);
+//        controller.init();
+
     }
 
 

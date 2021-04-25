@@ -15,8 +15,7 @@ public class DaoModel<T> {
     DbConnect conn = null;
     Dotenv dotenv = Dotenv.load();
     String tablePrefix = dotenv.get("DB_PREFIX");
-
-
+    
     public DbConnect getConnection(){
         return conn;
     }
@@ -155,7 +154,6 @@ public class DaoModel<T> {
     }
 
     public void setupRoot(){
-
         if ( !rowExists(getTableName("users"), "user_id", dotenv.get("ADMIN_ID")) ){
             if (!rowExists(getTableName("users"), "user_id", dotenv.get("ADMIN_ID")) ){
                 // Create root user if not exist
@@ -168,8 +166,6 @@ public class DaoModel<T> {
             }
 
             // Create default capabilities
-            // Can create, read, update, delete users
-            // Can create, read, update, delete activity history
             if (!rowExists(getTableName("capabilities"), "cap_name", "can_create_user")){
                 new CapabilityModel("can_create_user", "can create new user").add();
                 new CapabilityModel("can_read_user", "can retrieve and view list of users").add();
@@ -183,7 +179,6 @@ public class DaoModel<T> {
             }
 
             // Add Admin role in options table
-
             if (! rowExists(getTableName("options"), "option_key", "role_capabilities") ){
                 // Get all capabilities inserted above
                 Vector<Vector<Object>> capData = readData(new CapabilityModel().getAllCapabilities(), getTableName("capabilities"));
@@ -219,8 +214,7 @@ public class DaoModel<T> {
 
             }
 
-            // Assign role to User in Usermeta table
-            // Create root user
+            // Assign role to User in Usermeta table // Create root user
             if (! rowExists(getTableName("usermeta"), "user_id", dotenv.get("ADMIN_ID")) ){
                 ArrayList<String> roles  = new ArrayList<>();
                 roles.add("Administrator");
@@ -231,12 +225,8 @@ public class DaoModel<T> {
                 UsermetaModel adminMeta = new UsermetaModel( Integer.parseInt(dotenv.get("ADMIN_ID")), "user_roles",  rolesJson );
                 adminMeta.save(false);
             }
-
         }
-
-
     }
-
 
     public Boolean rowExists(String tableName, String colName, String colVal){
         ResultSet rs = null;
@@ -245,20 +235,26 @@ public class DaoModel<T> {
         try{
             PreparedStatement sqlstmt = new DbConnect().connect().prepareStatement(sql);
             rs = sqlstmt.executeQuery();
-            new DbConnect().connect().close(); // close database connection
-            System.out.println();
-
             if ( readDataSize(rs, tableName) > 0){
                 return true;
             }
 
+            sqlstmt.close(); // close statement
+
         } catch (SQLException se){
             se.printStackTrace();
+        } finally { // close db connection
+            try {
+                rs.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
         }
+
+
 
         return false;
     }
-
 
     public int readDataSize(ResultSet rs, String tableName){
         // instantiate vector objects to hold column/row data for JTable
@@ -276,7 +272,6 @@ public class DaoModel<T> {
                 cols = metaData.getColumnName(i);
                 column.add(cols);
             }
-
             // get row data from table!
             while (rs.next()) {
                 Vector<Object> row = new Vector<Object>(columns);
@@ -285,8 +280,13 @@ public class DaoModel<T> {
                 data.addElement(row);
                 size++;
             }
-            rs.close(); //close ResultSet instance
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) { e.printStackTrace(); } finally {
+            try {
+                rs.close(); //close ResultSet instance
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
 
 
         return size;
@@ -317,36 +317,16 @@ public class DaoModel<T> {
 
             }
 
-            rs.close(); //close ResultSet instance
-        } catch (SQLException e) { e.printStackTrace(); }
 
-        return data;
-    }
-
-
-
-    public Vector<String> getTableCols(String tableName){
-        Vector<String> column = new Vector<String>();
-        String sql = "select * from "+ tableName+" limit 1";
-
-        // get column names from table!
-        try{
-            PreparedStatement sqlstmt = new DbConnect().connect().prepareStatement(sql);
-            ResultSet rs = sqlstmt.executeQuery();
-
-            ResultSetMetaData metaData = rs.getMetaData();
-            int columns = metaData.getColumnCount();
-
-            String cols = "";
-            for (int i = 1; i <= columns; i++) {
-                cols = metaData.getColumnName(i);
-                column.add(cols);
+        } catch (SQLException e) { e.printStackTrace(); } finally {
+            try {
+                rs.close(); //close ResultSet instance
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException se){
-            se.printStackTrace();
         }
 
-        return column;
+        return data;
     }
 
     // prepare statement with arraylist
@@ -383,22 +363,6 @@ public class DaoModel<T> {
         sbPreparedSQL.append(")");
 
         return sbPreparedSQL.toString();
-    }
-
-
-    public Vector<String> removeColumn(Vector<String> tableColumns, String regex){
-
-        Pattern p = Pattern.compile(regex);
-
-        for ( int i=0; i<tableColumns.size(); i++) {
-
-            if (p.matcher(tableColumns.get(i)).find()){
-                tableColumns.remove(i);
-            }
-        }
-
-         System.out.println("DaoModel.removeColumn():  " +  tableColumns );
-        return tableColumns;
     }
 
     // prepare statement for select operation
@@ -442,6 +406,21 @@ public class DaoModel<T> {
         return preparedUpdateSQL;
     }
 
+    public Vector<String> removeColumn(Vector<String> tableColumns, String regex){
+
+        Pattern p = Pattern.compile(regex);
+
+        for ( int i=0; i<tableColumns.size(); i++) {
+
+            if (p.matcher(tableColumns.get(i)).find()){
+                tableColumns.remove(i);
+            }
+        }
+
+        System.out.println("DaoModel.removeColumn():  " +  tableColumns );
+        return tableColumns;
+    }
+
     // prepare statement for select operation
     public String prepareSelectStmt(String tableName, String whereClause){
         String preparedSelectSQL = "Select * from " + tableName + " where " + whereClause;
@@ -456,4 +435,27 @@ public class DaoModel<T> {
         return "";
     }
 
+    public Vector<String> getTableCols(String tableName){
+        Vector<String> column = new Vector<String>();
+        String sql = "select * from "+ tableName+" limit 1";
+
+        // get column names from table!
+        try{
+            PreparedStatement sqlstmt = new DbConnect().connect().prepareStatement(sql);
+            ResultSet rs = sqlstmt.executeQuery();
+
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columns = metaData.getColumnCount();
+
+            String cols = "";
+            for (int i = 1; i <= columns; i++) {
+                cols = metaData.getColumnName(i);
+                column.add(cols);
+            }
+        } catch (SQLException se){
+            se.printStackTrace();
+        }
+
+        return column;
+    }
 }

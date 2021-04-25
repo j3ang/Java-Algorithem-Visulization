@@ -80,6 +80,7 @@ public class UsersController extends ConfigurationController implements Initiali
     @FXML
     private Text usersMessage;
 
+    DaoModel dao = new DaoModel();
 
 
     @Override
@@ -119,7 +120,6 @@ public class UsersController extends ConfigurationController implements Initiali
     public ObservableList<UserModel> getUsersList(){
         ObservableList<UserModel> usersList = FXCollections.observableArrayList();
         Vector users = UserModel.getAllUsers();
-        DaoModel dao = new DaoModel();
 
         // Create a new user per each result set row
         for(int i = 0 ; i < users.size() ; i++){
@@ -129,33 +129,6 @@ public class UsersController extends ConfigurationController implements Initiali
                     .split(",");
 
             UserModel userModel = UserModel.vectorToUser(parsedUser);
-
-
-            try{ // Check if this user has role assigned
-                ArrayList<String> thisUserRoles = new ArrayList<>();
-                String sql = "SELECT meta_desc from " + dao.getTableName("usermeta") +
-                    " where user_id="+ userModel.getUser_id() +" and meta_name='user_roles'";
-                ResultSet rs = new DbConnect().connect().createStatement().executeQuery(sql);
-                ResultSetMetaData rsmd = rs.getMetaData();
-                int columnsNumber = rsmd.getColumnCount();
-
-                if (rs.next()) { // add to the Observable array list
-                    for (int j = 1; j <= columnsNumber; j++) {
-                        if (j > 1) System.out.print(",  ");
-                        String columnValue = rs.getString(j).replaceAll("\\p{Punct}", "");
-                        thisUserRoles.add(columnValue);
-                        userModel.setRoles(thisUserRoles);
-                    }
-                } else {
-                    thisUserRoles.add("User");
-                    userModel.setRoles(thisUserRoles);
-                }
-
-                rs.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
-
             usersList.add(userModel); // Populate the user Observable list
         }
         return usersList;
@@ -175,7 +148,6 @@ public class UsersController extends ConfigurationController implements Initiali
         return optionList;
 
     }
-
 
 
     public void showUsers(){
@@ -203,6 +175,7 @@ public class UsersController extends ConfigurationController implements Initiali
 
         usersComboRole.setItems(roleNameList);
         System.out.println("getRoleCapsList.showRoles()");
+
     }
 
 
@@ -216,11 +189,9 @@ public class UsersController extends ConfigurationController implements Initiali
         }
     }
 
-
     @FXML
     private void BtnNewUserAction(ActionEvent event){
         usersMessage.setText(""); // clear previous messages
-        DaoModel dao = new DaoModel();
         // save new user of not exist in users table
         if ( ! dao.rowExists(dao.getTableName("users"), "username", usersInputUsername.getText()) ){
             ArrayList<String> roles = new ArrayList<>();
@@ -247,7 +218,6 @@ public class UsersController extends ConfigurationController implements Initiali
 
     @FXML
     private void BtnUpdateUserAction(ActionEvent event){
-        DaoModel dao = new DaoModel();
         UserModel userModel = (UserModel) usersTable.getSelectionModel().getSelectedItem();
 
         userModel.setUser_id(Integer.parseInt(usersInputUserId.getText().strip()));
@@ -297,6 +267,7 @@ public class UsersController extends ConfigurationController implements Initiali
 
     }
 
+    @FXML
     private boolean confirmAction(String action){
 
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -327,7 +298,6 @@ public class UsersController extends ConfigurationController implements Initiali
     public void BtnBackAction(ActionEvent evt) {
         Main.loadScene(evt, "configuration", false);
     }
-
 
     @FXML
     private void tableViewClickedAction(MouseEvent event){

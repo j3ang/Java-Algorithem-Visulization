@@ -6,6 +6,7 @@ module ALlgorithemeViz{
     requires com.google.gson;
     requires org.apache.commons.codec;
     requires dotenv.java;
+    requires java.desktop;
 
     opens application;
     opens models;
