@@ -1,22 +1,20 @@
 package Threading;
 
 import javafx.concurrent.Task;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.chart.XYChart;
 
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SortTask  extends Task<SwapItem> {
 
-    protected final ArrayList<Rectangle> rectanglesArray;
+    protected final XYChart.Series<String, Integer> chartData;
     protected final AtomicBoolean flag;
+    protected long comparisonCount = 0;
 
-    public SortTask(ArrayList<Rectangle> rectanglesArray) {
-        this.rectanglesArray = rectanglesArray;
+    public SortTask(XYChart.Series<String, Integer> chartData) {
+        this.chartData = chartData;
         this.flag = new AtomicBoolean(false);
     }
-
-    protected abstract void doSorting();
 
     @Override
     protected SwapItem call() throws Exception {
@@ -30,20 +28,21 @@ public abstract class SortTask  extends Task<SwapItem> {
 
     public abstract Runnable getSwapCode(SwapItem swapItem);
 
-    protected int getValueAt(int index){
-        Rectangle rect = rectanglesArray.get(index);
-        return Double.valueOf(rect.getHeight()).intValue();
+    protected int getValueAt(int index) {
+        return chartData.getData().get(index).getYValue();
     }
-    protected void setValueAt(int index, Integer value){
-        Rectangle rect = rectanglesArray.get(index);
-        rect.setHeight(value);
+
+    protected void setValueAt(int index, int value) {
+        chartData.getData().get(index).setYValue(value);
     }
+
+    protected abstract void doSorting();
 
     protected void waitOnFlag() {
         flag.set(false);
         long val = System.currentTimeMillis();
         while (!flag.get()) {
-            if ((System.currentTimeMillis() - val) > 500) {
+            if ((System.currentTimeMillis() - val) > 1000) {
                 System.out.println("Locked");
                 flag.set(true);
             }
@@ -52,6 +51,10 @@ public abstract class SortTask  extends Task<SwapItem> {
 
     public void setFlag(boolean value) {
         flag.set(value);
+    }
+
+    protected void updateComparisonMessage() {
+        updateMessage("Number of comparisons: " + comparisonCount);
     }
 
 

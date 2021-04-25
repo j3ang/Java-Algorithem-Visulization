@@ -1,6 +1,7 @@
 package models;
 
 import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
 
 import java.util.Arrays;
 
@@ -13,6 +14,7 @@ public final class Session {
     private int[] generatedNumbers;
     private static Scene window;
     private double rectWidth;
+    private XYChart.Series<String, Integer> chartData;
 
     public Session(ConfigModel config) {
         Session.config = config;
@@ -88,5 +90,13 @@ public final class Session {
 
     public Scene getWindow() {
         return window;
+    }
+
+    public void setChartData(XYChart.Series<String, Integer> chartData) {
+        this.chartData = chartData;
+    }
+
+    public XYChart.Series<String, Integer> getChartData() {
+        return chartData;
     }
 }

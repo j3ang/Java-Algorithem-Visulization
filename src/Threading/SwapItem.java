@@ -1,54 +1,34 @@
 package Threading;
 
-import javafx.scene.shape.Rectangle;
+import javafx.scene.chart.XYChart;
 
 public class SwapItem {
-    private Rectangle rectToSwap;
-    private int originalPos;
-    private int secondPos;
-    private int value;
+
+    private XYChart.Data<String, Integer> itemToSwap;
+    private final int swapIndex;
+    private int rawValue;
 
 
-    // Set original index, and have the painted rectangle array
-    public SwapItem(Rectangle rectToSwap, int originalPos) {
-        this.rectToSwap = rectToSwap;
-        this.originalPos = originalPos;
+    public SwapItem(int rawValue, int swapIndex) {
+        this.rawValue = rawValue;
+        this.swapIndex = swapIndex;
     }
 
-    public Rectangle getRectToSwap() {
-        return rectToSwap;
+
+
+    public int getRawValue() {
+        return rawValue;
     }
 
-    public SwapItem setRectToSwap(Rectangle rectToSwap) {
-        Rectangle thisRectToSwap = rectToSwap;
-        this.rectToSwap = thisRectToSwap;
-        return this;
+    public void setRawValue(int rawValue) {
+        this.rawValue = rawValue;
     }
 
-    public int getOriginalPos() {
-        return originalPos;
+    public XYChart.Data<String, Integer> getItemToSwap() {
+        return itemToSwap;
     }
 
-    public SwapItem setOriginalPos(int originalPos) {
-        this.originalPos = originalPos;
-        return this;
-    }
-
-    public int getSecondPos() {
-        return secondPos;
-    }
-
-    public SwapItem setSecondPos(int secondPos) {
-        this.secondPos = secondPos;
-        return this;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public SwapItem setValue(int value) {
-        this.value = value;
-        return this;
+    public int getSwapIndex() {
+        return swapIndex;
     }
 }

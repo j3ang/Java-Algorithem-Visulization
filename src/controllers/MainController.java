@@ -2,21 +2,14 @@ package controllers;
 
 import Threading.SortTask;
 import Threading.SwapItem;
-import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
 import models.ConfigModel;
 import models.MainModel;
 import models.Session;
@@ -31,9 +24,8 @@ public class MainController extends ConfigurationController implements Initializ
     @FXML
     AnchorPane mainAnchor = new AnchorPane();
     @FXML
-    XYChart  chart;
-
-    XYChart.Series series =  new XYChart.Series();
+    private BarChart<String, Integer> chart;
+    private final XYChart.Series<String, Integer> chartData = new XYChart.Series();
     int[] generatedNumbers;
 
     Session session = Session.getInstace(new ConfigModel());
@@ -50,25 +42,10 @@ public class MainController extends ConfigurationController implements Initializ
                 });
             }
         }, 2000);
-    }
-
-    private void startSort() {
-
-        SortTask sortTask = new BubbleSort(new Visualizer().getRectangles());
-        Thread th = new Thread(sortTask);
-        th.setDaemon(true);
-        th.start();
-
-        System.out.println("Sorting is started: " + sortTask.getClass().getName());
-        sortTask.valueProperty().addListener((ObservableValue<? extends SwapItem> observable, SwapItem oldValue, SwapItem newValue) -> {
-            sortTask.getSwapCode(newValue).run();
-            if (newValue != null) {
-                System.out.println("the bigger rectangle posiition is at: " + newValue.getOriginalPos() + "\n" +
-                        "second position: " + newValue.getSecondPos());
-            }
-        });
 
     }
+
+
 
     public void setUp() {
         initData(); // loggedIn user
@@ -76,22 +53,52 @@ public class MainController extends ConfigurationController implements Initializ
         // session set up generated numbers
         int[] numbersArr = getRandomizedNumbers();
         session.setGeneratedNumbers( numbersArr );
-        generatedNumbers  = session.getGeneratedNumbers();
-        HashMap<Integer, Color> rainbowMap =
-                new Visualizer().getRaindowColorMap(generatedNumbers);
+        HashMap<Integer, HashMap<Integer, String>> rainbowColoredNumbersMap
+                = new Visualizer().getRainbowColoredNumbersMap(session.getGeneratedNumbers());
+
         System.out.println("MainController.initialize(): " + session.toString());
 
-        // Charts Setup - add number to series
-        for (int i = 0; i < generatedNumbers.length; i++)
-            series.getData().add(new XYChart.Data(String.valueOf(i), generatedNumbers[i]));
-        chart.getData().addAll(series);
 
-        // Charts Setup - add color to series data
-        for ( Object data : series.getData() ){
-            XYChart.Data thisData = (XYChart.Data)data;
-            Color color = rainbowMap.get(thisData.getYValue());
-            thisData.getNode().setStyle("-fx-bar-fill: " + toHexString(color) +";");
+        // Set Chart
+        chart.getData().setAll(chartData);
+        for (int i = 0; i < rainbowColoredNumbersMap.size(); i++){
+            // add number value to series
+            chartData.getData().add(new XYChart.Data(String.valueOf(i), rainbowColoredNumbersMap.get(i).keySet().toArray()[0] ) );
         }
+
+        for ( int j = 0 ; j < chartData.getData().size(); j++ ){
+//            System.out.println("Color " + rainbowColoredNumbersMap.get(j).values().toArray()[0]);
+            String color = rainbowColoredNumbersMap.get(j).values().toArray()[0].toString();
+            XYChart.Data thisData =  chartData.getData().get(j);
+            thisData.getNode().setStyle("-fx-bar-fill: " + color +";");
+        }
+
+        chart.getYAxis().setTickMarkVisible(false);
+        chart.getXAxis().setTickMarkVisible(false);
+
+        int [] arr = new int[chartData.getData().size()];
+        for (int i = 0; i < chartData.getData().size(); i++){
+            arr[i] = chartData.getData().get(i).getYValue();
+        }
+        System.out.println("before sorted:" + Arrays.toString(arr));
+
+
+    }
+
+    private void startSort() {
+        SortTask sortTask = new BubbleSort(chartData);
+        Thread th = new Thread(sortTask);
+        th.setDaemon(true);
+        th.start();
+        System.out.println("Sorting is started: " + sortTask.getClass().getName());
+        sortTask.valueProperty().addListener((ObservableValue<? extends SwapItem> observable, SwapItem oldValue, SwapItem newValue) -> {
+            sortTask.getSwapCode(newValue).run();
+
+
+        });
+
+
+
 
     }
 
@@ -103,14 +110,5 @@ public class MainController extends ConfigurationController implements Initializ
         return randomNumbers;
     }
 
-
-    // Helpers
-    private static String toHexString(Color color) {
-        int r = ((int) Math.round(color.getRed()     * 255)) << 24;
-        int g = ((int) Math.round(color.getGreen()   * 255)) << 16;
-        int b = ((int) Math.round(color.getBlue()    * 255)) << 8;
-        int a = ((int) Math.round(color.getOpacity() * 255));
-        return String.format("#%08X", (r + g + b + a));
-    }
 
 }

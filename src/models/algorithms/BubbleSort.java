@@ -2,42 +2,34 @@ package models.algorithms;
 
 import Threading.SortTask;
 import Threading.SwapItem;
-import javafx.animation.TranslateTransition;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
+import javafx.scene.chart.XYChart;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
 public class BubbleSort extends SortTask {
 
     // this will setup the rectangles Array
-    public BubbleSort(ArrayList<Rectangle> rectanglesArray) {
-        super(rectanglesArray);
+    public BubbleSort(XYChart.Series<String, Integer> chartData) {
+        super(chartData);
     }
+
 
     @Override
     protected void doSorting() {
+        int n = chartData.getData().size();
+        boolean swapped;
 
-        System.out.println("entered doSorting..");
-        System.out.println("right now rectanglesArray is set to " + rectanglesArray);
-        // iterate the array length - 1 to do comparison
-        // this should be the index of the number to be compared
-        for ( int f=0; f < rectanglesArray.size() - 1; f++ ){
+        for ( int i = 0; i < n - 1; i++ ){
             // move the number to be compared through the array length
             // as long as the index is less than the length after deducted first number index
-            for ( int s = 0; s < rectanglesArray.size() - f - 1; s++ ){
-                int secondRectHeight = Double.valueOf(rectanglesArray.get(s+1).getHeight()).intValue();
-                int firstRectHeight =  Double.valueOf(rectanglesArray.get(s).getHeight()).intValue();
-                if ( secondRectHeight > firstRectHeight ){
-                    // return item to be swapped
-//                    System.out.println("rectanglesArray.get(s) is set to :" + rectanglesArray.get(s));
-                    SwapItem swapItem = new SwapItem(rectanglesArray.get(s+1), s+1);
-                    swapItem.setSecondPos(s);
-                    updateValue(swapItem);
-                    waitOnFlag();
+            for (int j = 0; j < n - i - 1; j++){
+                waitOnFlag();
+                if (  getValueAt(j) >  getValueAt(j+1)  ){
+                    updateValue(new SwapItem(chartData.getData().get(j).getYValue(), j+1));    // talk to event listener in main controller
+
                 }
             }
+
         }
     }
 
@@ -46,12 +38,15 @@ public class BubbleSort extends SortTask {
 
         return ()->{ // returns runnable
             try {
-                if (swapItem != null) {
-                    System.out.println("swapItem is not null: " + swapItem);
-                    Rectangle rect = swapItem.getRectToSwap();
-                    System.out.println("swapItem.getRectToSwap is not null: " + rect);
+
+                if(swapItem!=null){
+                    // temp
+                    int i = swapItem.getSwapIndex(); //  value at left
+                   setValueAt(i-1, getValueAt(i));
+                   setValueAt(i, swapItem.getRawValue());
 
                 }
+
                 flag.set(true);
             } catch (Exception exp) {
                 exp.printStackTrace();
