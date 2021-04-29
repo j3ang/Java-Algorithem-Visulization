@@ -137,21 +137,19 @@ public class MainController extends ConfigurationController implements Initializ
     }
 
     // Created sorting task from selection
+    // https://stackoverflow.com/questions/1268817/create-new-object-from-a-string-in-java
     private SortTask getSelectedSortTask(){
         SortTask sortTask = null;
         try{
             String task = session.getConfig().getAlgorithmSelected();
             String className = task.replace("class ", "");
             Class<?> cl = Class.forName(className);
-            System.out.println("Class.forName: " + cl);
             Constructor con = cl.getConstructor();
-            System.out.println("constructor: " + con);
             sortTask = (SortTask) con.newInstance();
-            System.out.println("created sorting task" + sortTask);
+            System.out.println("created sorting task: " + sortTask);
 
             sortTask.setChartData(chartData);
             sortTask.setSession(session);
-
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
