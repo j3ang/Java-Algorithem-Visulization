@@ -1,0 +1,375 @@
+@startuml
+class controllers.UsersController {
+- TableView usersTable
+- TextField usersInputUserId
+- TextField usersInputFirstname
+- TextField usersInputLastname
+- TextField usersInputUsername
+- TextField usersInputPassword
+- ComboBox usersComboRole
+- TableColumn<UserModel,Integer> usersColUserId
+- TableColumn<UserModel,String> usersColFirstname
+- TableColumn<UserModel,String> usersColLastname
+- TableColumn<UserModel,String> usersColUsername
+- TableColumn<UserModel,String> usersColPassword
+- TableColumn<UserModel,String> usersColRole
+- Button usersBtnNewUser
+- Button usersBtnUpdate
+- Button usersBtnDelete
+- Button usersBtnClear
+- Button closeBtn
+- VBox usersVboxInput
+- VBox loggedinUserVBox
+- Text usersMessage
+~ DaoModel dao
++ void initialize(URL,ResourceBundle)
++ void bindUpdateBtn(Button)
++ void bindNewBtn(Button)
++ ObservableList<UserModel> getUsersList()
++ ObservableList<RoleModel> getRoleCapsList()
++ void showUsers()
++ void showRoles()
+- void BtnClearAction(ActionEvent)
+- void BtnNewUserAction(ActionEvent)
+- void BtnUpdateUserAction(ActionEvent)
+- void BtnDeleteUserAction(ActionEvent)
+- boolean confirmAction(String)
++ void BtnBackAction(ActionEvent)
+- void tableViewClickedAction(MouseEvent)
+}
+class controllers.MainController {
+~ AnchorPane mainAnchor
+- BarChart<String,Integer> chart
+- XYChart.Series<String,Integer> chartData
+~ int[] generatedNumbers
+~ Session session
+~ MainModel main
++ void initialize(URL,ResourceBundle)
++ void setUp()
+- void startSort()
++ int[] getRandomizedNumbers()
+}
+class models.Visualizer {
+~ Session session
++ <<Create>> Visualizer()
++ HashMap<Integer,HashMap<Integer,String>> getRainbowColoredNumbersMap(int[])
++ {static} int[] findIndex(int[],int)
++ {static} String toHexString(Color)
+}
+class controllers.CustomHboxControl {
+~ HboxController controller
++ <<Create>> CustomHboxControl()
++ HboxController getController()
++ CustomHboxControl setController(HboxController)
+}
+class controllers.LoginController {
+- ImageView brandingImageView
+- Label loginMessage
+- Button btnLogin
+- Button btnSignUp
+- TextField inputUsername
+- TextField inputPassword
+- Scene signupScene
+- Scene configurationScene
++ void initialize(URL,ResourceBundle)
++ void loginBtnOnAction(ActionEvent)
++ void signupBtnOnAction(ActionEvent)
++ void nextScreen(ActionEvent)
+}
+class models.ConfigModel {
++ int MIN_NUMBERS
++ int MAX_NUMBERS
++ double MIN_SPEED_INTERVAL
++ double MAX_SPEED_INTERVAL
+- int numbersSize
+- double speedInterval
++ <<Create>> ConfigModel()
++ <<Create>> ConfigModel(int)
++ <<Create>> ConfigModel(int,double)
++ int getNumbersSize()
++ ConfigModel setNumbersSize(int)
++ double getSpeedInterval()
++ ConfigModel setSpeedInterval(double)
+}
+class controllers.ProfileController {
+- VBox usersVboxInput
+- Button usersBtnUpdate
+- Button usersBtnClear
++ void initialize(URL,ResourceBundle)
++ void fillInputBox()
+- void BtnUpdateUserAction(ActionEvent)
+}
+class models.algorithms.NumbersList {
+- List<String> numbers
++ void getRandomNumbers()
+}
+class controllers.ConfigurationController {
+- ImageView avatarImageView
+- VBox loggedinUserVBox
+- VBox vTop
+- AnchorPane configsAnchor
+~ ConfigModel sessionConfig
++ void initialize(URL,ResourceBundle)
+- void setUpParams(ConfigModel)
++ void sliderConfig(Slider,Double)
++ SplitMenuButton setUpLoggedInUser()
++ void initData()
++ void runAction(ActionEvent)
+}
+class models.OptionModel {
+- int option_id
+- String option_key
+- HashMap<String,Vector> option_value
+- String optionsTable
++ <<Create>> OptionModel()
++ <<Create>> OptionModel(String,HashMap<String,Vector>)
++ <<Create>> OptionModel(int,String,HashMap<String,Vector>)
++ Vector<RoleModel> decodeOptionValue(String)
++ void save(Boolean)
++ Vector<RoleModel> getRoleCapOption(String)
++ int getOption_id()
++ OptionModel setOption_id(int)
++ String getOption_key()
++ OptionModel setOption_key(String)
++ HashMap<String,Vector> getOption_value()
++ OptionModel setOption_value(HashMap<String,Vector>)
+}
+class application.Main {
++ {static} Stage window
+- {static} double xOffset
+- {static} double yOffset
++ {static} UserModel userModelLoggedIn
++ {static} SplitMenuButton splitMenuButton
++ {static} void main(String[])
++ {static} void showImage(String,ImageView)
++ void start(Stage)
++ {static} void logout(Button)
++ {static} Object loadScene(ActionEvent,String,boolean)
++ {static} void makeDraggable(Scene,Stage)
+}
+class Threading.SwapItem {
+- XYChart.Data<String,Integer> itemToSwap
+- int swapIndex
+- int rawValue
+- String style
++ <<Create>> SwapItem(int,int,String)
++ int getRawValue()
++ void setRawValue(int)
++ XYChart.Data<String,Integer> getItemToSwap()
++ int getSwapIndex()
++ String getStyle()
+}
+class controllers.SignupController {
+- Scene loginScene
+- ImageView brandingImageView
+- Label signupMessage
+- HashMap<String,Object> form
++ void initialize(URL,ResourceBundle)
++ void createAcct()
++ void signupBtnCancelOnAction(ActionEvent)
++ Boolean validateForm(String[])
++ {static} String hashPassword(String)
+}
+class models.UsermetaModel {
+- int meta_id
+- String mata_name
++ <<Create>> UsermetaModel()
++ <<Create>> UsermetaModel(int,String,String)
++ <<Create>> UsermetaModel(int,int,String,String)
++ void save(boolean)
++ int getMeta_id()
++ UsermetaModel setMeta_id(int)
++ int getUser_id()
++ UsermetaModel setUser_id(int)
++ String getMata_name()
++ UsermetaModel setMata_name(String)
++ String getMeta_desc()
++ UsermetaModel setMeta_desc(String)
+}
+class controllers.HboxController {
+- StackPane stackPane
+- HBox rectWraper
++ void initialize(URL,ResourceBundle)
++ HBox getRectWraper()
++ HboxController setRectWraper(HBox)
+}
+
+class controllers.HistoryController {
+- ImageView avatarImageView
+- SplitMenuButton splitMenuButton
+- VBox loggedinUserVBox
++ void initialize(URL,ResourceBundle)
++ void historyBackBtnAction(ActionEvent)
+}
+
+class models.algorithms.BubbleSort {
++ <<Create>> BubbleSort(XYChart.Series<String,Integer>)
+# void doSorting()
++ Runnable getSwapCode(SwapItem)
+}
+abstract class Threading.SortTask {
+# XYChart.Series<String,Integer> chartData
+# AtomicBoolean flag
+# long comparisonCount
++ <<Create>> SortTask(XYChart.Series<String,Integer>)
+# SwapItem call()
++ {abstract}Runnable getSwapCode(SwapItem)
+# void setXvalueAt(int,String)
+# String getXvalueAt(int)
+# int getValueAt(int)
+# void setValueAt(int,int)
+# String getStyleAt(int)
+# void setStyleAt(int,String)
+# {abstract}void doSorting()
+# void waitOnFlag()
++ String getName()
++ void setFlag(boolean)
+# void updateComparisonMessage()
+}
+class models.DbConnect {
+~ {static} String DB_URL
+~ {static} String USER
++ Connection connect()
+}
+class models.Session {
+- {static} Session instance
+- {static} ConfigModel config
+- {static} double drawingWrapperWidth
+- int[] generatedNumbers
+- {static} Scene window
+- double rectWidth
+- XYChart.Series<String,Integer> chartData
++ <<Create>> Session(ConfigModel)
++ <<Create>> Session()
++ {static} Session getInstace(ConfigModel)
++ ConfigModel getConfig()
++ Session setConfig(ConfigModel)
++ {static} double getDrawingWrapperWidth()
++ {static} void setDrawingWrapperWidth(double)
++ {static} double getDrawingWrapperHeight()
++ {static} void setDrawingWrapperHeight(double)
++ int[] getGeneratedNumbers()
++ Session setGeneratedNumbers(int[])
++ double getRectWidth()
++ Session setRectWidth(double)
++ String toString()
++ void setWindow(Scene)
++ Scene getWindow()
++ void setChartData(XYChart.Series<String,Integer>)
++ XYChart.Series<String,Integer> getChartData()
+}
+class models.LoginModel {
+- DaoModel dao
+- String usersTable
++ boolean login(String,String)
+}
+class models.DaoModel {
+~ DbConnect conn
+~ Dotenv dotenv
+~ String tablePrefix
+~ String[] tableNames
++ DbConnect getConnection()
++ DbConnect DaoModel()
++ void executeStatement(String,String)
++ void createTable()
++ void setupRoot()
++ Boolean rowExists(String,String,String)
++ int readDataSize(ResultSet,String)
++ Vector<Vector<Object>> readData(ResultSet,String)
++ String prepareInsertStmt(String,Vector<String>,ArrayList<String>,Boolean)
++ String prepareUpdateStmt(String,Vector<String>,ArrayList<String>,String)
++ Vector<String> removeColumn(Vector<String>,String)
++ String prepareSelectStmt(String,String)
++ String getTableName(String)
++ Vector<String> getTableCols(String)
+}
+class models.RoleModel {
+- String role
+- Vector<String> capabilities
++ <<Create>> RoleModel(String,Vector<String>)
++ <<Create>> RoleModel()
++ String getRole()
++ RoleModel setRole(String)
++ Vector<String> getCapabilities()
++ RoleModel setCapabilities(Vector<String>)
+}
+class models.MainModel {
+~ Session session
++ <<Create>> MainModel()
++ int[] getRandomNumbers(int,double)
++ double getNumbersSum(int[])
+}
+class models.UserModel {
+- int user_id
+- String firstname
+- ArrayList<String> roles
+~ DaoModel dao
+~ String usersTable
++ <<Create>> UserModel(int,String,String,String,String,String)
++ <<Create>> UserModel(int,String,String,String,String)
++ <<Create>> UserModel(String,String,String,String,ArrayList<String>)
++ <<Create>> UserModel(String,String,String,String)
++ <<Create>> UserModel()
++ <<Create>> UserModel(int,ArrayList<String>)
++ void delete()
++ void save(boolean,boolean)
++ {static} void getUserRole(DaoModel,UserModel)
++ {static} void setUserRole(DaoModel,UserModel)
++ {static} Vector getAllUsers()
++ {static} UserModel getUserByUsername(String)
++ UserModel getUserById(int)
++ {static} UserModel vectorToUser(String[])
++ int getUser_id()
++ UserModel setUser_id(int)
++ String getFirstname()
++ UserModel setFirstname(String)
++ String getLastname()
++ UserModel setLastname(String)
++ String getUsername()
++ UserModel setUsername(String)
++ String getPassword()
++ UserModel setPassword(String)
++ String getDt_created()
++ UserModel setDt_created(String)
++ ArrayList<String> getRoles()
++ UserModel setRoles(ArrayList<String>)
+}
+class models.CapabilityModel {
+- int cap_id
+- String cap_name
+~ DaoModel dao
+~ String capabilitiesTable
++ <<Create>> CapabilityModel()
++ <<Create>> CapabilityModel(String,String)
++ <<Create>> CapabilityModel(int,String,String,String)
++ void add()
++ ResultSet getAllCapabilities()
++ int getCap_id()
++ CapabilityModel setCap_id(int)
++ String getCap_name()
++ CapabilityModel setCap_name(String)
++ String getCap_desc()
++ CapabilityModel setCap_desc(String)
++ String getCap_dt_created()
++ CapabilityModel setCap_dt_created(String)
+}
+
+
+javafx.fxml.Initializable <|.. controllers.UsersController
+controllers.ConfigurationController <|-- controllers.UsersController
+javafx.fxml.Initializable <|.. controllers.MainController
+controllers.ConfigurationController <|-- controllers.MainController
+models.MainModel <|-- models.Visualizer
+javafx.scene.layout.StackPane <|-- controllers.CustomHboxControl
+javafx.fxml.Initializable <|.. controllers.LoginController
+javafx.fxml.Initializable <|.. controllers.ProfileController
+controllers.UsersController <|-- controllers.ProfileController
+javafx.fxml.Initializable <|.. controllers.ConfigurationController
+javafx.application.Application <|-- application.Main
+javafx.fxml.Initializable <|.. controllers.SignupController
+javafx.fxml.Initializable <|.. controllers.HboxController
+javafx.fxml.Initializable <|.. controllers.HistoryController
+controllers.ConfigurationController <|-- controllers.HistoryController
+Threading.SortTask <|-- models.algorithms.BubbleSort
+javafx.concurrent.Task <|-- Threading.SortTask
+@enduml

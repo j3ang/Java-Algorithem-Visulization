@@ -1,7 +1,6 @@
 package controllers;
 
 import application.Main;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -20,19 +19,19 @@ import models.UserModel;
 import models.algorithms.commons.NumbersList;
 import models.algorithms.commons.SortTask;
 
-import java.awt.font.OpenType;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
  * The type Configuration controller.
  */
-public class ConfigurationController extends NumbersList implements Initializable  {
+public class ConfigurationController extends NumbersList implements Initializable {
     @FXML
     private ImageView avatarImageView;
     @FXML
@@ -40,40 +39,68 @@ public class ConfigurationController extends NumbersList implements Initializabl
     @FXML
     private VBox vTop;
     @FXML
+    private VBox algoVBox;
+    @FXML
     private AnchorPane configsAnchor;
 
     /**
      * The Session config.
      */
-    ConfigModel sessionConfig;
-    Session  session;
+
+    Session session;
 
     public ConfigurationController() {
         this.session = Session.getInstace();
-        this.sessionConfig = session.getConfig();
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initData();
-        setUpParams();
-
+        setUpConfigs();
     }
 
-    private void setUpParams() {
-        for ( int i = 0; i <  configsAnchor.getChildren().size(); i++ ){
+    private void setUpConfigs() {
+        // Display available algorithms
+        List<Class<SortTask>> sortTasks = getAlgorithms("models.algorithms");
+        ListView algoList = new ListView();
+
+        // Add to algorithms list view
+        for (Object algo : sortTasks){
+            algoList.getItems().add(algo.toString());
+            System.out.println("algo.getClass(): " +  algo);
+        }
+        algoVBox.getChildren().add(algoList);
+        algoVBox.setSpacing(40);
+
+        // default sorting algorithm to first item in the list
+        algoList.getSelectionModel().selectFirst();
+        session.getConfig().setAlgorithmsSelected( algoList.getSelectionModel().getSelectedItem().toString() ) ;
+
+        // Set session algorithms on click
+        algoList.setOnMouseClicked(mouseEvent -> {
+            try{
+                System.out.println("Selected: " + algoList.getSelectionModel().getSelectedItem() + " | Saving to session config...");
+                session.getConfig().setAlgorithmsSelected( algoList.getSelectionModel().getSelectedItem().toString() ) ;
+            } catch ( NullPointerException e ){
+                System.out.println("No Algorithm Selected!");
+            }
+        });
+
+        // Parameters controllers
+        for (int i = 0; i < configsAnchor.getChildren().size(); i++) {
             String id = configsAnchor.getChildren().get(i).getId();
+            ConfigModel sessionConfig = session.getConfig();
             try {
                 switch (id) {
                     case "configNumbers":
                         // Common slider configs
-                        Slider numbersSlider = (Slider)configsAnchor.lookup("#" + id);
+                        Slider numbersSlider = (Slider) configsAnchor.lookup("#" + id);
                         sliderConfig(numbersSlider, (double) sessionConfig.MAX_NUMBERS);
                         numbersSlider.setMin(sessionConfig.MIN_NUMBERS);
                         numbersSlider.setMax(sessionConfig.MAX_NUMBERS);
 
                         // Set default value
-                        Text indicator = ((Text)configsAnchor.lookup("#configNumbersIndicator"));
+                        Text indicator = ((Text) configsAnchor.lookup("#configNumbersIndicator"));
                         indicator.setText(String.valueOf(sessionConfig.getNumbersSize()));
                         numbersSlider.setValue(sessionConfig.getNumbersSize());
 
@@ -92,46 +119,76 @@ public class ConfigurationController extends NumbersList implements Initializabl
 
                     case "configSpeed":
                         // Common slider configs
-                        Slider speedSlider = (Slider)configsAnchor.lookup("#" + id);
-                        Text inidcator = ((Text)configsAnchor.lookup("#configSpeedIndicator"));
+                        Slider speedSlider = (Slider) configsAnchor.lookup("#" + id);
+                        Text inidcator = ((Text) configsAnchor.lookup("#configSpeedIndicator"));
 
                         // config number slider event listener
                         timeDurationSliderListener(session, speedSlider, inidcator);
 
                         break;
                 }
-            } catch ( NullPointerException e){
+            } catch (NullPointerException e) {
                 System.out.println(e.getMessage());
             }
         }
     }
 
-    public void sliderConfig(Slider s, double max){
-        s.setShowTickLabels(true);
-        s.setShowTickMarks(true);
-        s.setMajorTickUnit(max/5f);
-        s.setBlockIncrement(max/10f);
+
+    // https://stackoverflow.com/questions/1810614/getting-all-classes-from-a-package
+    private List<Class<SortTask>> getAlgorithms(String packageName) {
+
+        List<Class<SortTask>> sortTasks = new ArrayList<>();
+        try {
+            URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", "/"));
+
+            // Filter .class files.
+            File[] files = new File(root.getFile()).listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    return name.endsWith(".class");
+                }
+            });
+
+            // Find classes implementing ICommand.
+            for (File file : files) {
+                String className = file.getName().replaceAll(".class$", "");
+                Class<?> cls = Class.forName(packageName + "." + className);
+                if (SortTask.class.isAssignableFrom(cls)) {
+                    sortTasks.add((Class<SortTask>) cls);
+                }
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return sortTasks;
     }
 
-    public void sliderConfig(Slider s, long max){
+    public void sliderConfig(Slider s, double max) {
         s.setShowTickLabels(true);
         s.setShowTickMarks(true);
-        s.setMajorTickUnit(max/5f);
-        s.setBlockIncrement(max/10f);
+        s.setMajorTickUnit(max / 5f);
+        s.setBlockIncrement(max / 10f);
     }
 
-    public void timeDurationSliderListener(Session session,Slider slider, Text text){
+    public void sliderConfig(Slider s, long max) {
+        s.setShowTickLabels(true);
+        s.setShowTickMarks(true);
+        s.setMajorTickUnit(max / 5f);
+        s.setBlockIncrement(max / 10f);
+    }
+
+    public void timeDurationSliderListener(Session session, Slider slider, Text text) {
         // Set default value
         sliderConfig(slider, session.getConfig().MAX_SPEED_INTERVAL);
         slider.setMin(session.getConfig().MIN_SPEED_INTERVAL);
         slider.setMax(session.getConfig().MAX_SPEED_INTERVAL);
         slider.setValue(session.getConfig().getSpeedInterval());
-        text.setText((session.getConfig().getSpeedInterval()*1000.0)/1000.0 + " millisec");
+        text.setText((session.getConfig().getSpeedInterval() * 1000.0) / 1000.0 + " millisec");
 
         slider.valueProperty().addListener((observableValue, initValue, newValue) -> {
             long currentIntervalSpeed = Double.valueOf((Double) newValue).longValue();
             System.out.println("Slider  " + slider.getId() + " value changed:" + currentIntervalSpeed);
-            text.setText((currentIntervalSpeed*1000.0)/1000.0 + " millisec"); // update indicator speed interval
+            text.setText((currentIntervalSpeed * 1000.0) / 1000.0 + " millisec"); // update indicator speed interval
             session.getConfig().setSpeedInterval(currentIntervalSpeed);    // update session config speed interval
         });
     }
@@ -141,22 +198,22 @@ public class ConfigurationController extends NumbersList implements Initializabl
      *
      * @return the split menu button
      */
-    public SplitMenuButton setUpLoggedInUser(){
+    public SplitMenuButton setUpLoggedInUser() {
         UserModel userModelLoggedIn = Main.userModelLoggedIn;
 
-        Text roleText  = (Text) loggedinUserVBox.lookup("#" + loggedinUserVBox.getChildren().get(0).getId());
-        roleText.setText( userModelLoggedIn.getRoles().get(0) );
+        Text roleText = (Text) loggedinUserVBox.lookup("#" + loggedinUserVBox.getChildren().get(0).getId());
+        roleText.setText(userModelLoggedIn.getRoles().get(0));
 
-        SplitMenuButton m  = (SplitMenuButton)loggedinUserVBox.lookup("#" + loggedinUserVBox.getChildren().get(1).getId());
+        SplitMenuButton m = (SplitMenuButton) loggedinUserVBox.lookup("#" + loggedinUserVBox.getChildren().get(1).getId());
         String fullname = userModelLoggedIn.getFirstname() + " " + userModelLoggedIn.getLastname();
         m.setText(fullname);
 
         System.out.println(
                 "ConfigurationController.setUpLoggedInUser(): " +
-                        "\n" + "Fullname: " + fullname  +
+                        "\n" + "Fullname: " + fullname +
                         "\n" + "User ID: " + userModelLoggedIn.getUser_id() +
                         "\n" + "username: " + userModelLoggedIn.getUsername() +
-                        "\n" + "Role: " + userModelLoggedIn.getRoles() );
+                        "\n" + "Role: " + userModelLoggedIn.getRoles());
 
         return m;
 
@@ -171,10 +228,10 @@ public class ConfigurationController extends NumbersList implements Initializabl
         SplitMenuButton m = setUpLoggedInUser();
 
         // Create Menu Items programmatically
-        MenuItem users =  new MenuItem("Manage Users");
+        MenuItem users = new MenuItem("Manage Users");
         MenuItem history = new MenuItem("History");
         MenuItem configuration = new MenuItem("Configuration");
-        MenuItem logout  = new MenuItem("Logout");
+        MenuItem logout = new MenuItem("Logout");
         m.getItems().addAll(
                 users,
                 history,
@@ -188,27 +245,27 @@ public class ConfigurationController extends NumbersList implements Initializabl
         btnLoadScenes.add("history");
         btnLoadScenes.add("configuration");
         btnLoadScenes.add("login");
-        for(int i=0; i< m.getItems().size(); i++){
+        for (int i = 0; i < m.getItems().size(); i++) {
             int finalI = i;
-            m.getItems().get(i).setOnAction((e)->{
+            m.getItems().get(i).setOnAction((e) -> {
                 // new alert
-                Alert alert ;
+                Alert alert;
                 Optional<ButtonType> result = Optional.of(ButtonType.OK);
-                if ( Session.getInstace().getThread() != null && Session.getInstace().getThread().isAlive()){
+                if (Session.getInstace().getThread() != null && Session.getInstace().getThread().isAlive()) {
                     alert = new Alert(Alert.AlertType.CONFIRMATION);
-                    alert.setTitle("Terminate " + Session.getInstace().getThread().getName() );
+                    alert.setTitle("Terminate " + Session.getInstace().getThread().getName());
                     alert.setContentText("Are you sure you want to leave?");
                     result = alert.showAndWait();
                 }
 
                 // result action
-                if (result.get() == ButtonType.OK){
+                if (result.get() == ButtonType.OK) {
                     // ... user chose OK
                     stopThread();
                     System.out.println("==============================================");
                     System.out.println("Loading " + btnLoadScenes.get(finalI) + ".fxml");
                     System.out.println("==============================================");
-                    Main.loadScene(e,   btnLoadScenes.get(finalI) , true);
+                    Main.loadScene(e, btnLoadScenes.get(finalI), true);
                 } else {
                     // ... user chose CANCEL or closed the dialog
                     System.out.println("request cancelled");
@@ -219,38 +276,38 @@ public class ConfigurationController extends NumbersList implements Initializabl
 
         // Could use capabilities for more flexibility
         // Restricting admin vs. user view
-        if ( !Main.userModelLoggedIn.getRoles().get(0).equals("Administrator") && !Main.userModelLoggedIn.getRoles().get(0).equals("Manager") ){
+        if (!Main.userModelLoggedIn.getRoles().get(0).equals("Administrator") && !Main.userModelLoggedIn.getRoles().get(0).equals("Manager")) {
             users.setVisible(false);
         }
 
         // add eventListener for fx:id="closeBtn"
-        Button closeBtn = (Button)vTop.lookup("#closeBtn");
-        closeBtn.setOnAction((e)->{
+        Button closeBtn = (Button) vTop.lookup("#closeBtn");
+        closeBtn.setOnAction((e) -> {
             System.out.println("Close Btn clicked.");
-            Stage stage = (Stage)((Node)e.getSource()).getScene().getWindow();
+            Stage stage = (Stage) ((Node) e.getSource()).getScene().getWindow();
             stage.close();
         });
 
         // add eventListener for profile using the split menu main button
-        m.setOnAction((e)->{
+        m.setOnAction((e) -> {
             // new alert
-            Alert alert ;
+            Alert alert;
             Optional<ButtonType> result = Optional.of(ButtonType.OK);
-            if ( Session.getInstace().getThread() != null && Session.getInstace().getThread().isAlive()){
+            if (Session.getInstace().getThread() != null && Session.getInstace().getThread().isAlive()) {
                 alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setTitle("Terminate " + Session.getInstace().getThread().getName() );
+                alert.setTitle("Terminate " + Session.getInstace().getThread().getName());
                 alert.setContentText("Are you sure you want to leave?");
                 result = alert.showAndWait();
             }
 
             // result action
-            if (result.get() == ButtonType.OK){
+            if (result.get() == ButtonType.OK) {
                 // ... user chose OK
                 stopThread();
                 System.out.println("==============================================");
                 System.out.println("Loading " + "profile" + ".fxml");
                 System.out.println("==============================================");
-                Main.loadScene(e,   "profile" , true);
+                Main.loadScene(e, "profile", true);
             } else {
                 // ... user chose CANCEL or closed the dialog
                 System.out.println("request cancelled");
@@ -258,10 +315,9 @@ public class ConfigurationController extends NumbersList implements Initializabl
         });
 
 
-
     }
 
-    private void stopThread(){
+    private void stopThread() {
         try {
             System.out.println("Interrupting running thread.");
             Session.getInstace().getThread().interrupt();
@@ -281,5 +337,19 @@ public class ConfigurationController extends NumbersList implements Initializabl
         Main.loadScene(evt, "main", false);
     }
 
+    private String getAlgorithmName(String algoClass) {
+        String Regex = "(\\.)(\\w+)(\\.)(\\w+)";
+        Pattern pattern = Pattern.compile(Regex);
 
+        Matcher matcher = pattern.matcher(algoClass);
+        if (matcher.find()) {
+            System.out.println("found algo");
+            String name = matcher.group(4);
+            System.out.println(name);
+            return name;
+        }
+        return "";
+    }
 }
+
+

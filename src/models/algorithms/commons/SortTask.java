@@ -2,21 +2,18 @@ package models.algorithms.commons;
 
 import javafx.concurrent.Task;
 import javafx.scene.chart.XYChart;
-import models.ConfigModel;
 import models.Session;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public abstract class SortTask extends Task<SwapItem> {
 
-    protected final XYChart.Series<String, Integer> chartData;
-    protected final AtomicBoolean flag;
-    protected long comparisonCount = 0;
+    protected XYChart.Series<String, Integer> chartData;
     protected Session session;
+    protected final AtomicBoolean flag;
 
-    public SortTask(XYChart.Series<String, Integer> chartData, Session session) {
+
+    public SortTask() {
         this.chartData = chartData;
         this.session = session;
         this.flag = new AtomicBoolean(false);
@@ -61,20 +58,26 @@ public abstract class SortTask extends Task<SwapItem> {
         }
     }
 
-    public String getName(){
-        String Regex = "(\\.)(\\w+)(\\.)(\\w+)";
-        Pattern pattern = Pattern.compile(Regex);
-        Matcher matcher = pattern.matcher(getClass().getName());
-        if ( matcher.find() ){
-            String name = matcher.group(4);
-            System.out.println(name);
-            return name;
-        }
-        return "";
-    }
 
     public void setFlag(boolean value) {
         flag.set(value);
     }
 
+    public SortTask setChartData(XYChart.Series<String, Integer> chartData) {
+        this.chartData = chartData;
+        return this;
+    }
+
+    public XYChart.Series<String, Integer> getChartData() {
+        return chartData;
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    public SortTask setSession(Session session) {
+        this.session = session;
+        return this;
+    }
 }

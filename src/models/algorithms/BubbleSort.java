@@ -1,21 +1,22 @@
 package models.algorithms;
 
-import javafx.util.Duration;
+import javafx.scene.chart.XYChart;
 import models.Session;
 import models.algorithms.commons.SortTask;
 import models.algorithms.commons.SwapItem;
-import javafx.scene.chart.XYChart;
-
-import java.util.concurrent.TimeUnit;
 
 public class BubbleSort extends SortTask {
 
     // this will setup the rectangles Array
     public BubbleSort(XYChart.Series<String, Integer> chartData, Session session) {
-        super(chartData, session);
+        super();
     }
 
     String borderBottomBlack = "-fx-border-color: transparent transparent Black transparent; -fx-border-width:8;";
+
+    public BubbleSort() {
+        super();
+    }
 
     @Override
     protected void doSorting() {

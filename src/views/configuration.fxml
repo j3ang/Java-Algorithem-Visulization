@@ -86,7 +86,7 @@
       </VBox>
       <HBox alignment="CENTER" layoutX="63.0" layoutY="226.0" prefHeight="523.0" prefWidth="1039.0" spacing="40.0">
          <children>
-            <VBox prefHeight="523.0" prefWidth="543.0">
+            <VBox fx:id="algoVBox" prefHeight="523.0" prefWidth="543.0">
                <children>
                   <Label text="1. Algorithms">
                      <font>
