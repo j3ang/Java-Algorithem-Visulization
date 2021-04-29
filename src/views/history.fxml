@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.SplitMenuButton?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -14,7 +15,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="828.0" prefWidth="1169.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.HistoryController">
    <children>
-      <Button layoutX="987.0" layoutY="729.0" mnemonicParsing="false" onAction="#historyBackBtnAction" text="Back to configuration" />
+      <Button layoutX="967.0" layoutY="719.0" mnemonicParsing="false" onAction="#historyBackBtnAction" text="Back to configuration" />
       <VBox fx:id="vTop" alignment="TOP_RIGHT" layoutX="20.0" layoutY="27.0" prefHeight="180.0" prefWidth="1169.0">
          <children>
             <HBox>
@@ -83,5 +84,6 @@
             </AnchorPane>
          </children>
       </VBox>
+      <TableView fx:id="historyTable" layoutX="62.0" layoutY="226.0" prefHeight="460.0" prefWidth="1039.0" />
    </children>
 </AnchorPane>

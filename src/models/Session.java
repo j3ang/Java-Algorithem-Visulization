@@ -15,6 +15,7 @@ public final class Session {
     private static Scene window;
     private double rectWidth;
     private XYChart.Series<String, Integer> chartData;
+    private Thread thread;
 
     public Session(ConfigModel config) {
         Session.config = config;
@@ -25,9 +26,9 @@ public final class Session {
     }
 
     // Set Session
-    public static Session getInstace(ConfigModel config ) {
+    public static Session getInstace() {
         if(instance == null) {
-            instance = new Session(config);
+            instance = new Session(new ConfigModel());
         }
         return instance;
     }
@@ -98,5 +99,13 @@ public final class Session {
 
     public XYChart.Series<String, Integer> getChartData() {
         return chartData;
+    }
+
+    public void setThread(Thread thread) {
+        this.thread = thread;
+    }
+
+    public Thread getThread() {
+        return thread;
     }
 }

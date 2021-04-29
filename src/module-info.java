@@ -13,4 +13,5 @@ module ALlgorithemeViz{
     opens views;
     opens controllers;
     opens models.algorithms;
+    opens models.algorithms.commons;
 }

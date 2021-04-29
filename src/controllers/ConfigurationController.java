@@ -1,36 +1,38 @@
 package controllers;
 
 import application.Main;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.Slider;
-import javafx.scene.control.SplitMenuButton;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import models.ConfigModel;
 import models.Session;
 import models.UserModel;
+import models.algorithms.commons.NumbersList;
+import models.algorithms.commons.SortTask;
 
+import java.awt.font.OpenType;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 
-public class ConfigurationController implements Initializable  {
+/**
+ * The type Configuration controller.
+ */
+public class ConfigurationController extends NumbersList implements Initializable  {
     @FXML
     private ImageView avatarImageView;
     @FXML
@@ -40,19 +42,25 @@ public class ConfigurationController implements Initializable  {
     @FXML
     private AnchorPane configsAnchor;
 
+    /**
+     * The Session config.
+     */
     ConfigModel sessionConfig;
+    Session  session;
+
+    public ConfigurationController() {
+        this.session = Session.getInstace();
+        this.sessionConfig = session.getConfig();
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initData();
-        Session  session = Session.getInstace(new ConfigModel());
-        sessionConfig = session.getConfig();
-        System.out.println(session);
-        setUpParams(sessionConfig);
+        setUpParams();
 
     }
 
-    private void setUpParams(ConfigModel config) {
+    private void setUpParams() {
         for ( int i = 0; i <  configsAnchor.getChildren().size(); i++ ){
             String id = configsAnchor.getChildren().get(i).getId();
             try {
@@ -60,15 +68,14 @@ public class ConfigurationController implements Initializable  {
                     case "configNumbers":
                         // Common slider configs
                         Slider numbersSlider = (Slider)configsAnchor.lookup("#" + id);
-                        sliderConfig(numbersSlider, (double) config.MAX_NUMBERS);
-                        numbersSlider.setMin(config.MIN_NUMBERS);
-                        numbersSlider.setMax(config.MAX_NUMBERS);
+                        sliderConfig(numbersSlider, (double) sessionConfig.MAX_NUMBERS);
+                        numbersSlider.setMin(sessionConfig.MIN_NUMBERS);
+                        numbersSlider.setMax(sessionConfig.MAX_NUMBERS);
 
                         // Set default value
                         Text indicator = ((Text)configsAnchor.lookup("#configNumbersIndicator"));
-                        indicator.setText(String.valueOf(config.getNumbersSize()));
-                        numbersSlider.setValue(config.getNumbersSize());
-
+                        indicator.setText(String.valueOf(sessionConfig.getNumbersSize()));
+                        numbersSlider.setValue(sessionConfig.getNumbersSize());
 
                         // config number slider event listener
                         numbersSlider.valueProperty().addListener(new ChangeListener<Number>() {
@@ -86,43 +93,54 @@ public class ConfigurationController implements Initializable  {
                     case "configSpeed":
                         // Common slider configs
                         Slider speedSlider = (Slider)configsAnchor.lookup("#" + id);
-                        sliderConfig(speedSlider, config.MAX_SPEED_INTERVAL);
-                        speedSlider.setMin(config.MIN_SPEED_INTERVAL);
-                        speedSlider.setMax(config.MAX_SPEED_INTERVAL);
-
-                        // Set default value
-                        speedSlider.setValue(config.getSpeedInterval());
                         Text inidcator = ((Text)configsAnchor.lookup("#configSpeedIndicator"));
-                        inidcator.setText(String.valueOf(Math.round(config.getSpeedInterval() * 1000.0)/1000.0));
 
                         // config number slider event listener
-                        speedSlider.valueProperty().addListener(new ChangeListener<Number>() {
-                            @Override
-                            public void changed(ObservableValue<? extends Number> observableValue, Number initValue, Number newValue) {
-                                double currentIntervalSpeed = Math.round(newValue.doubleValue() * 1000.0)/1000.0;
-                                System.out.println("Slider " + id + " value changed:" + currentIntervalSpeed);
-                                inidcator.setText(String.valueOf(currentIntervalSpeed)); // update indicator speed interval
-                                sessionConfig.setSpeedInterval(currentIntervalSpeed);    // update session config speed interval
-                            }
-                        });
+                        timeDurationSliderListener(session, speedSlider, inidcator);
 
                         break;
                 }
             } catch ( NullPointerException e){
                 System.out.println(e.getMessage());
             }
-
-
         }
     }
 
-    public void sliderConfig(Slider s, Double max){
+    public void sliderConfig(Slider s, double max){
         s.setShowTickLabels(true);
         s.setShowTickMarks(true);
         s.setMajorTickUnit(max/5f);
         s.setBlockIncrement(max/10f);
     }
 
+    public void sliderConfig(Slider s, long max){
+        s.setShowTickLabels(true);
+        s.setShowTickMarks(true);
+        s.setMajorTickUnit(max/5f);
+        s.setBlockIncrement(max/10f);
+    }
+
+    public void timeDurationSliderListener(Session session,Slider slider, Text text){
+        // Set default value
+        sliderConfig(slider, session.getConfig().MAX_SPEED_INTERVAL);
+        slider.setMin(session.getConfig().MIN_SPEED_INTERVAL);
+        slider.setMax(session.getConfig().MAX_SPEED_INTERVAL);
+        slider.setValue(session.getConfig().getSpeedInterval());
+        text.setText((session.getConfig().getSpeedInterval()*1000.0)/1000.0 + " millisec");
+
+        slider.valueProperty().addListener((observableValue, initValue, newValue) -> {
+            long currentIntervalSpeed = Double.valueOf((Double) newValue).longValue();
+            System.out.println("Slider  " + slider.getId() + " value changed:" + currentIntervalSpeed);
+            text.setText((currentIntervalSpeed*1000.0)/1000.0 + " millisec"); // update indicator speed interval
+            session.getConfig().setSpeedInterval(currentIntervalSpeed);    // update session config speed interval
+        });
+    }
+
+    /**
+     * Set up logged in user split menu button.
+     *
+     * @return the split menu button
+     */
     public SplitMenuButton setUpLoggedInUser(){
         UserModel userModelLoggedIn = Main.userModelLoggedIn;
 
@@ -144,6 +162,9 @@ public class ConfigurationController implements Initializable  {
 
     }
 
+    /**
+     * Init data.
+     */
     public void initData() {
 
         Main.showImage("assets/img/avatar.png", avatarImageView);
@@ -170,10 +191,29 @@ public class ConfigurationController implements Initializable  {
         for(int i=0; i< m.getItems().size(); i++){
             int finalI = i;
             m.getItems().get(i).setOnAction((e)->{
-                System.out.println("==============================================");
-                System.out.println("Loading " + btnLoadScenes.get(finalI) + ".fxml");
-                System.out.println("==============================================");
-                Main.loadScene(e,   btnLoadScenes.get(finalI) , true);
+                // new alert
+                Alert alert ;
+                Optional<ButtonType> result = Optional.of(ButtonType.OK);
+                if ( Session.getInstace().getThread() != null && Session.getInstace().getThread().isAlive()){
+                    alert = new Alert(Alert.AlertType.CONFIRMATION);
+                    alert.setTitle("Terminate " + Session.getInstace().getThread().getName() );
+                    alert.setContentText("Are you sure you want to leave?");
+                    result = alert.showAndWait();
+                }
+
+                // result action
+                if (result.get() == ButtonType.OK){
+                    // ... user chose OK
+                    stopThread();
+                    System.out.println("==============================================");
+                    System.out.println("Loading " + btnLoadScenes.get(finalI) + ".fxml");
+                    System.out.println("==============================================");
+                    Main.loadScene(e,   btnLoadScenes.get(finalI) , true);
+                } else {
+                    // ... user chose CANCEL or closed the dialog
+                    System.out.println("request cancelled");
+                }
+
             });
         }
 
@@ -193,30 +233,52 @@ public class ConfigurationController implements Initializable  {
 
         // add eventListener for profile using the split menu main button
         m.setOnAction((e)->{
-            Main.loadScene(e, "profile", true);
+            // new alert
+            Alert alert ;
+            Optional<ButtonType> result = Optional.of(ButtonType.OK);
+            if ( Session.getInstace().getThread() != null && Session.getInstace().getThread().isAlive()){
+                alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setTitle("Terminate " + Session.getInstace().getThread().getName() );
+                alert.setContentText("Are you sure you want to leave?");
+                result = alert.showAndWait();
+            }
+
+            // result action
+            if (result.get() == ButtonType.OK){
+                // ... user chose OK
+                stopThread();
+                System.out.println("==============================================");
+                System.out.println("Loading " + "profile" + ".fxml");
+                System.out.println("==============================================");
+                Main.loadScene(e,   "profile" , true);
+            } else {
+                // ... user chose CANCEL or closed the dialog
+                System.out.println("request cancelled");
+            }
         });
-
-
-
 
 
 
     }
 
+    private void stopThread(){
+        try {
+            System.out.println("Interrupting running thread.");
+            Session.getInstace().getThread().interrupt();
+        } catch (NullPointerException nullException) {
+            System.out.println("No active running thread in session.");
+        }
+
+    }
+
+    /**
+     * Run action.
+     *
+     * @param evt the evt
+     * @throws IOException the io exception
+     */
     public void runAction(ActionEvent evt) throws IOException {
-        MainController m = (MainController) Main.loadScene(evt, "main", false);
-
-//        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/main.fxml"));
-//        Parent root = (Parent)loader.load();
-//        MainController controller = (MainController)loader.getController();
-//        Button btn = new Button();
-//       Stage stage = new Stage();
-//        StackPane stackPane = new StackPane();
-//        stackPane.getChildren().add(btn);
-//        stage.setScene(new Scene(stackPane, 300, 250));
-//        controller.setStage(stage);
-//        controller.init();
-
+        Main.loadScene(evt, "main", false);
     }
 
 

@@ -1,4 +1,4 @@
-package Threading;
+package models.algorithms.commons;
 
 import javafx.scene.chart.XYChart;
 
@@ -7,11 +7,13 @@ public class SwapItem {
     private XYChart.Data<String, Integer> itemToSwap;
     private final int swapIndex;
     private int rawValue;
+    private final String style;
 
 
-    public SwapItem(int rawValue, int swapIndex) {
+    public SwapItem(int rawValue, int swapIndex, String style) {
         this.rawValue = rawValue;
         this.swapIndex = swapIndex;
+        this.style = style;
     }
 
 
@@ -30,5 +32,9 @@ public class SwapItem {
 
     public int getSwapIndex() {
         return swapIndex;
+    }
+
+    public String getStyle() {
+        return style;
     }
 }

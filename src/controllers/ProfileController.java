@@ -7,12 +7,16 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import models.DaoModel;
 import models.UserModel;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class ProfileController extends  UsersController implements Initializable {
+/**
+ * The type Profile controller.
+ */
+public class ProfileController extends UsersController implements Initializable {
 
 
     @FXML
@@ -41,6 +45,9 @@ public class ProfileController extends  UsersController implements Initializable
     }
 
 
+    /**
+     * Fill input box.
+     */
     public void fillInputBox(){
         for (int i=0; i< usersVboxInput.getChildren().size(); i++){
             TextField tf = (TextField)usersVboxInput.lookup("#" + usersVboxInput.getChildren().get(i).getId());
@@ -107,10 +114,10 @@ public class ProfileController extends  UsersController implements Initializable
                 }
             }
 
-            updateUserModel.save(true, false);
+            updateUserModel.save(dao, true, false);
             updateUserModel.setRoles(Main.userModelLoggedIn.getRoles());
             Main.userModelLoggedIn = updateUserModel; // update static logged in user
-            setUpLoggedInUser(); // refresh loggedIn user
+            new ConfigurationController().setUpLoggedInUser(); // refresh loggedIn user
 
             // if password has changed, logout
             if ( pwChanged ){

@@ -5,20 +5,22 @@ import application.Main;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import models.DaoModel;
 import models.LoginModel;
 import models.UserModel;
-
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class LoginController implements Initializable {
+/**
+ * The type Login controller.
+ */
+public class LoginController extends DaoModel implements Initializable {
 
     @FXML
     private ImageView brandingImageView;
@@ -38,10 +40,16 @@ public class LoginController implements Initializable {
     private Scene configurationScene;
 
 
+
     public void initialize(URL url, ResourceBundle resourceBundle) {
         Main.showImage("assets/img/algoViz_login.jpg", brandingImageView);
     }
 
+    /**
+     * Login btn on action.
+     *
+     * @param evt the evt
+     */
     public void loginBtnOnAction(ActionEvent evt){
         if ( inputUsername.getText().isBlank() == false && inputPassword.getText().isBlank() == false  ){
             loginMessage.setText("Logging in...");
@@ -53,7 +61,7 @@ public class LoginController implements Initializable {
                         inputUsername.getText(),
                         SignupController.hashPassword( inputPassword.getText() ) )
                 ){
-                    Main.userModelLoggedIn = new UserModel().getUserByUsername(inputUsername.getText());
+                    Main.userModelLoggedIn = new UserModel().getUserByUsername(this, inputUsername.getText());
                     nextScreen(evt);
 
 
@@ -72,11 +80,21 @@ public class LoginController implements Initializable {
     }
 
 
+    /**
+     * Signup btn on action.
+     *
+     * @param evt the evt
+     */
     public void signupBtnOnAction(ActionEvent evt){
         Main.loadScene(evt, "signup", false);
     }
 
 
+    /**
+     * Next screen.
+     *
+     * @param evt the evt
+     */
     public void nextScreen(ActionEvent evt){
         Main.loadScene(evt, "configuration", false);
     }

@@ -15,12 +15,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import models.*;
 
+import java.awt.desktop.UserSessionEvent;
 import java.net.URL;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.*;
-import java.sql.ResultSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * The type Users controller.
+ */
 public class UsersController extends ConfigurationController implements Initializable {
 
     // Users table view
@@ -80,11 +82,20 @@ public class UsersController extends ConfigurationController implements Initiali
     @FXML
     private Text usersMessage;
 
-    DaoModel dao = new DaoModel();
+    /**
+     * The Dao.
+     */
+    DaoModel dao;
 
+
+    public UsersController() {
+       super();
+       this.dao = new DaoModel();
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+
         initData();
         showUsers();
         showRoles();
@@ -93,6 +104,11 @@ public class UsersController extends ConfigurationController implements Initiali
         bindNewBtn(usersBtnNewUser);
     }
 
+    /**
+     * Bind update btn.
+     *
+     * @param usersBtnUpdate the users btn update
+     */
     public void bindUpdateBtn(Button usersBtnUpdate){
 
         // Bind text fields states to the new update user button
@@ -105,6 +121,11 @@ public class UsersController extends ConfigurationController implements Initiali
         );
     }
 
+    /**
+     * Bind new btn.
+     *
+     * @param usersBtnNewUser the users btn new user
+     */
     public void bindNewBtn(Button usersBtnNewUser){
         // Bind text fields states to the new user button
         usersBtnNewUser.disableProperty().bind(
@@ -117,23 +138,50 @@ public class UsersController extends ConfigurationController implements Initiali
     }
 
 
+    /**
+     * Get users list observable list.
+     *
+     * @return the observable list
+     */
     public ObservableList<UserModel> getUsersList(){
         ObservableList<UserModel> usersList = FXCollections.observableArrayList();
-        Vector users = UserModel.getAllUsers();
+        UserModel userModel =  new UserModel();
+        Vector users = userModel.getAllUsers(dao);
+        Vector userRoles = userModel.getAllUserRoles(dao);
 
-        // Create a new user per each result set row
-        for(int i = 0 ; i < users.size() ; i++){
+        HashMap<Integer, String> roleMap = new HashMap<>();
+        userRoles.forEach(role->{
+            String[] parsedMeta = role.toString().replaceAll("\\p{P}","").split(" ");
+            int parsedId =  Integer.valueOf(parsedMeta[1]);
+            String parsedRole = parsedMeta[3];
+            roleMap.put(parsedId, parsedRole);
+        });
+
+        for (int i = 0; i < users.size(); i++){
+            // parse user
             String[] parsedUser = users.get(i).toString()
                     .replaceAll("\\[", "")
                     .replaceAll("\\]","")
                     .split(",");
-
-            UserModel userModel = UserModel.vectorToUser(parsedUser);
-            usersList.add(userModel); // Populate the user Observable list
+            // Create new User Object
+            UserModel user = UserModel.vectorToUser(parsedUser);
+            System.out.println("user id: " + user.getUser_id());
+            // if user id match -> set user role
+            if ( roleMap.containsKey(user.getUser_id()) ){
+                ArrayList<String> userRole = new ArrayList<>();
+                userRole.add( roleMap.get(user.getUser_id()));
+                user.setRoles(userRole);
+            }
+            usersList.add(user); // Populate the user Observable list
         }
         return usersList;
     }
 
+    /**
+     * Get role caps list observable list.
+     *
+     * @return the observable list
+     */
     public ObservableList<RoleModel> getRoleCapsList(){
         ObservableList<RoleModel> optionList = FXCollections.observableArrayList();
         OptionModel optionModel = new OptionModel();
@@ -150,6 +198,9 @@ public class UsersController extends ConfigurationController implements Initiali
     }
 
 
+    /**
+     * Show users.
+     */
     public void showUsers(){
 
         ObservableList<UserModel> userModels = getUsersList();
@@ -165,6 +216,9 @@ public class UsersController extends ConfigurationController implements Initiali
         System.out.println("UsersController.showUsers()");
     }
 
+    /**
+     * Show roles.
+     */
     public void showRoles(){
         ObservableList<RoleModel> roleList = getRoleCapsList();
         ObservableList<String> roleNameList =  FXCollections.observableArrayList();
@@ -203,9 +257,9 @@ public class UsersController extends ConfigurationController implements Initiali
                     usersInputUsername.getText(),
                     SignupController.hashPassword(usersInputPassword.getText()),
                     roles);
-            userModel.save(false, true);
+            userModel.save(dao, false, true);
 
-            UserModel userModelMetaSaved = new UserModel( UserModel.getUserByUsername(userModel.getUsername()).getUser_id(), roles );
+            UserModel userModelMetaSaved = new UserModel( UserModel.getUserByUsername(dao, userModel.getUsername()).getUser_id(), roles );
             UserModel.setUserRole(dao, userModelMetaSaved);
 
             showUsers(); // update table list view
@@ -235,12 +289,12 @@ public class UsersController extends ConfigurationController implements Initiali
         }
 
 
-        userModel.save(true, false); // Update
+        userModel.save(dao, true, false); // Update
 
         // User meta roles
         ArrayList<String> userRoles = new ArrayList<>();
         userRoles.add(usersComboRole.getValue().toString());
-        UserModel userModelMetaSaved = new UserModel(new UserModel().getUserByUsername(userModel.getUsername()).getUser_id(), userRoles);
+        UserModel userModelMetaSaved = new UserModel(new UserModel().getUserByUsername(dao, userModel.getUsername()).getUser_id(), userRoles);
         new UserModel().setUserRole(dao, userModelMetaSaved);
 
         // logout if downgrading current user from admin to user
@@ -260,7 +314,7 @@ public class UsersController extends ConfigurationController implements Initiali
 
         if( confirmAction("delete this user?") ){
             UserModel userModel = (UserModel) usersTable.getSelectionModel().getSelectedItem();
-            userModel.delete();
+            userModel.delete(dao);
             usersBtnClear.fire(); // clear form
             showUsers(); // refresh users list
         }
@@ -294,6 +348,11 @@ public class UsersController extends ConfigurationController implements Initiali
 
     }
 
+    /**
+     * Btn back action.
+     *
+     * @param evt the evt
+     */
     @FXML
     public void BtnBackAction(ActionEvent evt) {
         Main.loadScene(evt, "configuration", false);

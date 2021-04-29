@@ -12,12 +12,15 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import models.DaoModel;
 import models.UserModel;
+import org.apache.commons.codec.digest.DigestUtils;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.ResourceBundle;
-import org.apache.commons.codec.digest.DigestUtils;
 
+/**
+ * The type Signup controller.
+ */
 public class SignupController implements Initializable  {
 
     private Scene loginScene;
@@ -35,6 +38,9 @@ public class SignupController implements Initializable  {
         Main.showImage("assets/img/algoViz_login.jpg", brandingImageView);
     }
 
+    /**
+     * Create acct.
+     */
     public void createAcct(){
         String[] formItems = {"Firstname", "Lastname", "Username", "Password"};
 
@@ -67,7 +73,7 @@ public class SignupController implements Initializable  {
                    form.get("Lastname").toString(),
                    form.get("Username").toString(),
                    form.get("Password").toString());
-           newUserModel.save(false, true);
+           newUserModel.save(dao, false, true);
 
            signupMessage.setText("Your account has been created.");
            Parent parent = brandingImageView.getParent(); // the Parent (or Scene) that contains the TextFields
@@ -78,12 +84,22 @@ public class SignupController implements Initializable  {
     }
 
 
-
+    /**
+     * Signup btn cancel on action.
+     *
+     * @param evt the evt
+     */
     @FXML
     public void signupBtnCancelOnAction(ActionEvent evt){
         Main.loadScene(evt, "login", false);
     }
 
+    /**
+     * Validate form boolean.
+     *
+     * @param formItems the form items
+     * @return the boolean
+     */
     public Boolean validateForm(String[] formItems){
 
         // Check if account already exists
@@ -101,6 +117,13 @@ public class SignupController implements Initializable  {
 
 
     }
+
+    /**
+     * Hash password string.
+     *
+     * @param password the password
+     * @return the string
+     */
     public static String hashPassword(String password){
         // Hashing password with md5 since it's wildly supported
         String md5Hex = DigestUtils.md5Hex(password);

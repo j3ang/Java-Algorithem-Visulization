@@ -2,6 +2,7 @@ package models;
 
 import com.google.gson.Gson;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -12,8 +13,7 @@ public class UserModel {
     private int user_id;
     private String firstname, lastname, username, password, dt_created;
     private ArrayList<String>roles;
-    DaoModel dao = new DaoModel();
-    String usersTable = dao.getTableName("users");
+
 
     public UserModel(int user_id, String firstname, String lastname, String username, String password, String dt_created) {
         this.user_id = user_id;
@@ -48,6 +48,7 @@ public class UserModel {
     }
 
     public UserModel() {
+        super();
     }
 
     public UserModel(int user_id, ArrayList<String> roles) {
@@ -55,7 +56,21 @@ public class UserModel {
         this.roles = roles;
     }
 
-    public void delete(){
+    public Vector getAllUserRoles(DaoModel dao) {
+        Vector userRoles = new Vector();
+        try{
+            String sql = " select * from " + dao.getTableName("usermeta") +" where meta_name='user_roles'";
+            ResultSet rs = new DbConnect().connect().createStatement().executeQuery(sql);
+            userRoles = dao.readData(rs, dao.getTableName("usermeta"));
+            rs.close();
+        } catch (SQLException se){
+            se.printStackTrace();
+        }
+
+        return userRoles;
+    }
+
+    public void delete(DaoModel dao){
         String usersTable =  dao.getTableName("users");
         String uMetatable = dao.getTableName("usermeta");
 
@@ -68,7 +83,7 @@ public class UserModel {
         dao.executeStatement(usersTable, deleteUserQuery);
     }
 
-    public void save(boolean includeId, boolean newUser){
+    public void save(DaoModel dao, boolean includeId, boolean newUser){
 
         String usersTable =  dao.tablePrefix + "users";
         Vector<String> userCols = dao.getTableCols(usersTable);
@@ -159,8 +174,7 @@ public class UserModel {
     }
 
 
-    public static Vector getAllUsers(){
-        DaoModel dao = new DaoModel();
+    public  Vector getAllUsers(DaoModel dao){
         String  usersTable = dao.getTableName("users");
         String sql = dao.prepareSelectStmt(usersTable, "1=1");
         ResultSet rs = null;
@@ -177,9 +191,8 @@ public class UserModel {
 
 
 
-    public static UserModel getUserByUsername(String username){
+    public static UserModel getUserByUsername(DaoModel dao, String username){
         UserModel user = new UserModel();
-        DaoModel dao = new DaoModel();
         String  usersTable = dao.getTableName("users");
 
         String whereClause = "username='" + username + "'";
@@ -205,9 +218,10 @@ public class UserModel {
     }
 
 
-    public UserModel getUserById(int user_id){
+    public UserModel getUserById(DaoModel dao, int user_id){
         UserModel user = new UserModel();
         String whereClause = "user_id=" + user_id;
+        String usersTable  = dao.getTableName("users");
 
         String sql = dao.prepareSelectStmt(usersTable, whereClause);
         try{

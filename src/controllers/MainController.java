@@ -1,78 +1,119 @@
 package controllers;
 
-import Threading.SortTask;
-import Threading.SwapItem;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
+import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Text;
 import models.ConfigModel;
-import models.MainModel;
 import models.Session;
-import models.Visualizer;
 import models.algorithms.BubbleSort;
+import models.algorithms.commons.NumbersList;
+import models.algorithms.commons.SortTask;
+import models.algorithms.commons.SwapItem;
 
 import java.net.URL;
-import java.util.*;
+import java.util.HashMap;
+import java.util.ResourceBundle;
 
+/**
+ * The type Main controller.
+ */
 public class MainController extends ConfigurationController implements Initializable {
 
-    @FXML
-    AnchorPane mainAnchor = new AnchorPane();
+
     @FXML
     private BarChart<String, Integer> chart;
+    @FXML
     private final XYChart.Series<String, Integer> chartData = new XYChart.Series();
-    int[] generatedNumbers;
 
-    Session session = Session.getInstace(new ConfigModel());
-    MainModel main  = new MainModel();
+    Session session = Session.getInstace();
+    Thread sortingThread;
+    SortTask sortTask;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        setUp(); // init
-        new Timer().schedule(new TimerTask() {
-            @Override
-            public void run() {
-                Platform.runLater(() -> {
-                    startSort();
-                });
-            }
-        }, 2000);
+
+        initData(); // logged in user
+        setupControllers();
+        setUpChart();
 
     }
 
 
+    public void setupControllers(){
+        Slider timeDurationSlider = (Slider)chart.getParent().getParent().lookup("#configSpeed");
+        Text timeDurationText = (Text)chart.getParent().getParent().lookup("#configSpeedIndicator");
+        timeDurationSliderListener(session, timeDurationSlider, timeDurationText );
 
-    public void setUp() {
-        initData(); // loggedIn user
+        // Add start button
+        Button startBtn = new Button("Start");
+        startBtn.setId("startBtn");
+        startBtn.setOnAction((e)->{
+            Platform.runLater(()-> {
+                    startSort();
+            });
+        });
 
+
+
+        // Add save button
+        Button saveBtn = new Button("Save");
+        saveBtn.setOnAction((e)->{
+            System.out.println("Saving to database");
+        });
+
+
+
+
+        // Add stop button
+//        Button stopBtn = new Button("Stop");
+//        stopBtn.setOnAction((e)->{
+//            stop();
+//        });
+
+        ((HBox)timeDurationSlider.getParent().getParent()).getChildren().add(startBtn);
+        ((HBox)timeDurationSlider.getParent().getParent()).getChildren().add(saveBtn);
+//        ((HBox)timeDurationSlider.getParent().getParent()).getChildren().add(stopBtn);
+
+        ((HBox)timeDurationSlider.getParent().getParent()).setSpacing(40);
+        ((HBox)timeDurationSlider.getParent().getParent()).setPrefWidth(1169);
+
+    }
+
+    public void setUpChart(){
         // session set up generated numbers
-        int[] numbersArr = getRandomizedNumbers();
+        int[] numbersArr = getRandomNumbers(session.getConfig().getNumbersSize(), 338);
         session.setGeneratedNumbers( numbersArr );
         HashMap<Integer, HashMap<Integer, String>> rainbowColoredNumbersMap
-                = new Visualizer().getRainbowColoredNumbersMap(session.getGeneratedNumbers());
-
-        System.out.println("MainController.initialize(): " + session.toString());
-
+                = new NumbersList().getRainbowColoredNumbersMap(session.getGeneratedNumbers());
 
         // Set Chart
-        chart.getData().setAll(chartData);
         for (int i = 0; i < rainbowColoredNumbersMap.size(); i++){
-            // add number value to series
-            chartData.getData().add(new XYChart.Data(String.valueOf(i), rainbowColoredNumbersMap.get(i).keySet().toArray()[0] ) );
+            int number = (int) rainbowColoredNumbersMap.get(i).keySet().toArray()[0];
+            chartData.getData().add(new XYChart.Data(String.valueOf(i+1), number ));
         }
 
+        chart.getData().addAll(chartData);
+        System.out.println("charData: " + chartData.getData());
+
+        // Set bar color
         for ( int j = 0 ; j < chartData.getData().size(); j++ ){
-//            System.out.println("Color " + rainbowColoredNumbersMap.get(j).values().toArray()[0]);
             String color = rainbowColoredNumbersMap.get(j).values().toArray()[0].toString();
             XYChart.Data thisData =  chartData.getData().get(j);
             thisData.getNode().setStyle("-fx-bar-fill: " + color +";");
+
         }
 
+        chart.setLegendVisible(false);
+        chart.getXAxis().setLabel("Size of numbers");
         chart.getYAxis().setTickMarkVisible(false);
         chart.getXAxis().setTickMarkVisible(false);
 
@@ -80,35 +121,42 @@ public class MainController extends ConfigurationController implements Initializ
         for (int i = 0; i < chartData.getData().size(); i++){
             arr[i] = chartData.getData().get(i).getYValue();
         }
-        System.out.println("before sorted:" + Arrays.toString(arr));
-
-
     }
 
     private void startSort() {
-        SortTask sortTask = new BubbleSort(chartData);
-        Thread th = new Thread(sortTask);
-        th.setDaemon(true);
-        th.start();
-        System.out.println("Sorting is started: " + sortTask.getClass().getName());
-        sortTask.valueProperty().addListener((ObservableValue<? extends SwapItem> observable, SwapItem oldValue, SwapItem newValue) -> {
-            sortTask.getSwapCode(newValue).run();
 
-
+        sortTask = new BubbleSort(chartData, session);
+        // Disable start button if no threads are running
+        sortTask.runningProperty().addListener((observableValue, oldStatus, newStatus) -> {
+            Button startBtn  = (Button) chart.getParent().getParent().lookup("#startBtn");
+            startBtn.disableProperty().set(newStatus);
         });
 
 
 
-
+        chart.setTitle(  sortTask.getName() );
+        sortingThread = new Thread(sortTask);
+        session.setThread(sortingThread); // pass to session for termination purpose
+        System.out.println("saved sorting thread in session: " + sortingThread);
+        sortingThread.setDaemon(true);
+        sortingThread.start();
+        System.out.println("new sortingThread: " + sortingThread);
+        System.out.println("Sorting is started: " + sortTask.getClass().getName());
+        sortTask.valueProperty().addListener((ObservableValue<? extends SwapItem> observable, SwapItem oldValue, SwapItem newValue) -> {
+            sortTask.getSwapCode(newValue).run();
+        });
     }
 
-    // get random numbers from configured number size
-    public int[] getRandomizedNumbers(){
-        int[] randomNumbers = this.main.getRandomNumbers(session.getConfig().getNumbersSize(), 338);
-        System.out.println("MainController.getRandomizedNumbers(): " +  Arrays.toString(randomNumbers));
-        System.out.println("MainController.getRandomizedNumbers(): " + this.main.getNumbersSum(randomNumbers));
-        return randomNumbers;
+
+    private void stop(){
+        sortingThread.interrupt();
+        System.out.println(sortingThread);
     }
 
 
-}
+
+ }
+
+
+
+
