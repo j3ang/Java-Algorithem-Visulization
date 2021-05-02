@@ -19,11 +19,12 @@ import models.UserModel;
 import models.algorithms.commons.NumbersList;
 import models.algorithms.commons.SortTask;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -135,25 +136,55 @@ public class ConfigurationController extends NumbersList implements Initializabl
 
 
     // https://stackoverflow.com/questions/1810614/getting-all-classes-from-a-package
-    private List<Class<SortTask>> getAlgorithms(String packageName) {
+    private List<Class<SortTask>> getAlgorithms(String packageName)  {
 
         List<Class<SortTask>> sortTasks = new ArrayList<>();
+        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         try {
-            URL root = Thread.currentThread().getContextClassLoader().getResource(packageName.replace(".", "/"));
+            URL root = loader.getResource(packageName.replace(".", "/"));
+            String outPath = "algorithms.ser";
 
-            // Filter .class files.
-            File[] files = new File(root.getFile()).listFiles((dir, name) -> name.endsWith(".class"));
+            System.out.println("root.getProtocol() " + root.getProtocol());
+            System.out.println("root : " + root);
 
-            // Find classes implementing ICommand.
-            for (File file : files) {
-                String className = file.getName().replaceAll(".class$", "");
-                Class<?> cls = Class.forName(packageName + "." + className);
-                if (SortTask.class.isAssignableFrom(cls)) {
-                    sortTasks.add((Class<SortTask>) cls);
+            // Deserialize algorithms.ser
+            if (root.getProtocol().equals("jar")){
+                FileInputStream fileIn = new FileInputStream(outPath);
+                ObjectInputStream in = new ObjectInputStream(fileIn);
+                sortTasks = (List<Class<SortTask>>) in.readObject();
+                in.close();
+                fileIn.close();
+            } else {
+                // Filter .class files.
+                assert root != null;
+                File[] files = new File(root.getFile()).listFiles((dir, name) -> name.endsWith(".class"));
+
+                // Find classes implementing ICommand.
+                for (File file : files) {
+                    String className = file.getName().replaceAll(".class$", "");
+                    Class<?> cls = Class.forName(packageName + "." + className);
+                    if (SortTask.class.isAssignableFrom(cls)) {
+                        sortTasks.add((Class<SortTask>) cls);
+                    }
                 }
+
+                // Serialize this so jar file can read
+                // https://www.tutorialspoint.com/java/java_serialization.htm
+                System.out.println("Serializing algorithms...");
+                File algos = new File(outPath);
+                algos.createNewFile();
+                FileOutputStream fileOut = new FileOutputStream(algos, false);
+                ObjectOutputStream out = new ObjectOutputStream(fileOut);
+                out.writeObject(sortTasks);
+                out.close();
+                fileOut.close();
+                System.out.printf("Serialized data is saved in " + outPath);
             }
-        } catch (ClassNotFoundException e) {
+
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
+        } catch ( NullPointerException e){
+            System.out.println("Reading available algorithms from serialized object...");
         }
 
         return sortTasks;
