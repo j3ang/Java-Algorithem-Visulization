@@ -73,8 +73,21 @@ public class ConfigurationController extends NumbersList implements Initializabl
         algoVBox.getChildren().add(algoList);
         algoVBox.setSpacing(40);
 
-        // default sorting algorithm to first item in the list
-        algoList.getSelectionModel().selectFirst();
+        // Default sorting algorithm to first item in the list if session did not set
+        if ( session.getConfig().getAlgorithmSelected() == null ){
+            algoList.getSelectionModel().selectFirst();
+        } else {
+            int index = 0;
+            for ( Object algo : algoList.getItems() ){
+                System.out.println("availABLE ALGO: " + algo);
+                if (algo.toString().contains(session.getConfig().getAlgorithmSelected())){
+                    algoList.getSelectionModel().select(index);
+                }
+                index += 1;
+            }
+        }
+
+        // Save selected algorithm task to session
         session.getConfig().setAlgorithmsSelected( algoList.getSelectionModel().getSelectedItem().toString() ) ;
 
         // Set session algorithms on click

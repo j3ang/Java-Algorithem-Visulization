@@ -31,10 +31,14 @@ public class MainController extends ConfigurationController implements Initializ
     private BarChart<String, Integer> chart;
     @FXML
     private final XYChart.Series<String, Integer> chartData = new XYChart.Series();
+    @FXML
+    private Text durationText;
 
     Session session = Session.getInstace();
     Thread sortingThread;
     SortTask sortTask;
+    // https://gist.github.com/P7h/8691100
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -57,19 +61,13 @@ public class MainController extends ConfigurationController implements Initializ
             });
         });
 
-        // Add save button
-        Button saveBtn = new Button("Save");
-        saveBtn.setOnAction((e) -> {
-            System.out.println("Saving to database");
-        });
-
         ((HBox) timeDurationSlider.getParent().getParent()).getChildren().add(startBtn);
-        ((HBox) timeDurationSlider.getParent().getParent()).getChildren().add(saveBtn);
-
         ((HBox) timeDurationSlider.getParent().getParent()).setSpacing(40);
         ((HBox) timeDurationSlider.getParent().getParent()).setPrefWidth(1169);
 
     }
+
+
 
     public void setUpChart() {
 
@@ -90,6 +88,7 @@ public class MainController extends ConfigurationController implements Initializ
             chartData.getData().add(new XYChart.Data(String.valueOf(i + 1), number));
         }
 
+        // Apply chart series  to the chart
         chart.getData().addAll(chartData);
         System.out.println("charData: " + chartData.getData());
 
@@ -101,17 +100,12 @@ public class MainController extends ConfigurationController implements Initializ
 
         }
 
+        // Other Chart style
         chart.setLegendVisible(false);
         chart.getXAxis().setLabel("Size of numbers");
         chart.getYAxis().setTickMarkVisible(false);
         chart.getXAxis().setTickMarkVisible(false);
 
-
-
-        int[] arr = new int[chartData.getData().size()];
-        for (int i = 0; i < chartData.getData().size(); i++) {
-            arr[i] = chartData.getData().get(i).getYValue();
-        }
     }
 
     private void startSort() {
@@ -132,9 +126,17 @@ public class MainController extends ConfigurationController implements Initializ
         sortingThread.start();
         System.out.println("new sortingThread: " + sortingThread);
         System.out.println("Sorting is started: " + sortTask.getClass().getName());
+
+        // Add event listener on swap action
         sortTask.valueProperty().addListener((ObservableValue<? extends SwapItem> observable, SwapItem oldValue, SwapItem newValue) -> {
             sortTask.getSwapCode(newValue).run();
         });
+
+        // Update time elapsed
+        durationText.textProperty().bind(sortTask.messageProperty());
+
+
+
     }
 
     // Created sorting task from selection
@@ -167,6 +169,8 @@ public class MainController extends ConfigurationController implements Initializ
     }
     
 }
+
+
 
 
 

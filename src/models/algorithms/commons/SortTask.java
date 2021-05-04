@@ -1,9 +1,15 @@
 package models.algorithms.commons;
 
+import application.Main;
+import com.google.common.base.Stopwatch;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import javafx.concurrent.Task;
 import javafx.scene.chart.XYChart;
+import models.ActivityModel;
 import models.Session;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class SortTask extends Task<SwapItem> {
@@ -11,12 +17,13 @@ public abstract class SortTask extends Task<SwapItem> {
     protected XYChart.Series<String, Integer> chartData;
     protected Session session;
     protected final AtomicBoolean flag;
-
+    public Stopwatch stopwatch;
 
     public SortTask() {
         this.chartData = chartData;
         this.session = session;
         this.flag = new AtomicBoolean(false);
+        this.stopwatch = stopwatch;
     }
 
     @Override
@@ -79,5 +86,32 @@ public abstract class SortTask extends Task<SwapItem> {
     public SortTask setSession(Session session) {
         this.session = session;
         return this;
+    }
+
+    // Save to database
+    public void saveActivity(){
+        session.setDuration(stopwatch.elapsed(TimeUnit.SECONDS) + " sec");
+        // Create new HistoryModel object
+        String logJsonString = "{" +
+                "\"user_id\":"+ Main.userModelLoggedIn.getUser_id()  +"," +
+                "\"act_sort_task\":\""+  session.getConfig().getAlgorithmSelected()  +"\"," +
+                "\"act_sort_size\":" + session.getGeneratedNumbers().length + "," +
+                "\"act_sort_speed\":\"" + session.getConfig().getSpeedInterval() + " millisec\"" + "," +
+                "\"act_sort_duration\":\"" + session.getDuration() +"\""
+                + "}";
+
+        // Gson helper
+        GsonBuilder builder = new GsonBuilder();
+        builder.setPrettyPrinting();
+        Gson gson = builder.create();
+        ActivityModel log = gson.fromJson(logJsonString, ActivityModel.class); // Activity object created form Json
+
+        // Print to console
+        logJsonString = gson.toJson(log);
+        System.out.println(logJsonString);
+
+        // Save to database
+        System.out.println("Saving activity...");
+        log.save();
     }
 }

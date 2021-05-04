@@ -1,9 +1,14 @@
 package models.algorithms;
 
+import application.Main;
+import com.google.common.base.Stopwatch;
+import controllers.MainController;
 import javafx.scene.chart.XYChart;
 import models.Session;
 import models.algorithms.commons.SortTask;
 import models.algorithms.commons.SwapItem;
+
+import java.util.concurrent.TimeUnit;
 
 public class BubbleSort extends SortTask {
 
@@ -21,8 +26,8 @@ public class BubbleSort extends SortTask {
     @Override
     protected void doSorting() {
         int n = chartData.getData().size();
-
         try {
+            stopwatch = Stopwatch.createStarted();// Print to console
             for (int i = 0; i < n - 1; i++) {
                 // as long as the index is less than the length after deducted first number index
                 for (int j = 0; j < n - i - 1; j++) {
@@ -44,10 +49,15 @@ public class BubbleSort extends SortTask {
                     }
 
                     setStyleAt(j, getStyleAt(j).replaceAll("Black", "transparent"));
-
                 }
 
             }
+
+            // Stop stopwatch
+            stopwatch.stop();
+            updateMessage( "Time Elapsed: " + stopwatch.elapsed(TimeUnit.SECONDS) + " seconds" );
+            saveActivity();
+
         } catch (InterruptedException e) {
             System.out.println(e.getMessage());
         }

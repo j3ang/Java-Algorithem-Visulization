@@ -7,6 +7,7 @@ module ALlgorithemeViz{
     requires org.apache.commons.codec;
     requires dotenv.java;
     requires java.desktop;
+    requires com.google.common;
 
     opens application;
     opens models;

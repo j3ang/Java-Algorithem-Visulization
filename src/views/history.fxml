@@ -84,6 +84,6 @@
             </AnchorPane>
          </children>
       </VBox>
-      <TableView fx:id="historyTable" layoutX="62.0" layoutY="226.0" prefHeight="460.0" prefWidth="1039.0" />
+      <TableView fx:id="activitiesTable" layoutX="62.0" layoutY="226.0" prefHeight="460.0" prefWidth="1039.0" />
    </children>
 </AnchorPane>

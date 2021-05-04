@@ -98,6 +98,11 @@
                 <NumberAxis side="LEFT" />
               </yAxis>
             </BarChart>
+            <AnchorPane prefHeight="200.0" prefWidth="200.0">
+               <children>
+                  <Text fx:id="durationText" layoutX="803.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" />
+               </children>
+            </AnchorPane>
          </children>
       </StackPane>
       <HBox layoutX="116.0" layoutY="640.0" prefHeight="43.0" prefWidth="971.0" spacing="80.0">

@@ -3,6 +3,7 @@ package models;
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
 
+import java.time.Duration;
 import java.util.Arrays;
 
 // https://stackoverflow.com/questions/46508098/how-to-keep-user-information-after-login-in-javafx-desktop-application
@@ -16,6 +17,7 @@ public final class Session {
     private double rectWidth;
     private XYChart.Series<String, Integer> chartData;
     private Thread thread;
+    private String duration;
 
     public Session(ConfigModel config) {
         Session.config = config;
@@ -107,5 +109,12 @@ public final class Session {
 
     public Thread getThread() {
         return thread;
+    }
+
+    public void setDuration(String duration){
+        this.duration = duration;
+    }
+    public String getDuration() {
+        return duration;
     }
 }
