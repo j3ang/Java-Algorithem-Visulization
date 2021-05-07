@@ -1,5 +1,6 @@
 package models.algorithms;
 
+import com.google.common.base.Stopwatch;
 import javafx.scene.chart.XYChart;
 import models.Session;
 import models.algorithms.commons.SortTask;
@@ -17,13 +18,16 @@ public class InsertionSort extends SortTask {
     protected void doSorting() throws InterruptedException {
 
 		int n = chartData.getData().size();
-
+		stopwatch = Stopwatch.createStarted();// Print to console
 		for (int i = 1; i < n; ++i ) {
+
+
 			int keyValue = getYvalueAt(i);
 			String keyStyle = getStyleAt(i);
 			int j = i - 1;
 
 			while ( j >= 0 && getYvalueAt(j) > keyValue ){
+				Thread.sleep(session.getConfig().getSpeedInterval());
 				SwapItem swapItem = new SwapItem(
 				chartData.getData().get(j).getYValue(), j+1,
 				chartData.getData().get(j).getNode().getStyle()
@@ -32,10 +36,11 @@ public class InsertionSort extends SortTask {
 
 				// Delay
 				System.out.println("Sleeing for " + session.getConfig().getSpeedInterval() );
-				Thread.sleep(session.getConfig().getSpeedInterval());
+
 				j = j - 1;  // move to left
 				waitOnFlag();
 			}
+
 
 			setValueAt(j+1, keyValue);
 			setStyleAt(j+1, keyStyle);

@@ -12,8 +12,13 @@ public class ConfigModel{
     String algorithmSelected;
     long speedInterval;
 
+    // Construstor with default configure values
+	public ConfigModel() {
+		this.numbersSize = 20;
+		this.speedInterval = 10;
+	}
 
-    public int getNumbersSize() {
+	public int getNumbersSize() {
         return numbersSize;
     }
 

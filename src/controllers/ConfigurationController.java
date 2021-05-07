@@ -109,7 +109,8 @@ public class ConfigurationController extends NumbersList implements Initializabl
                     case "configNumbers":
                         // Common slider configs
                         Slider numbersSlider = (Slider) configsAnchor.lookup("#" + id);
-                        sliderConfig(numbersSlider, (int) sessionConfig.MAX_NUMBERS);
+						System.out.println("min numbers: " + sessionConfig.MIN_NUMBERS);
+                        sliderConfig(numbersSlider, sessionConfig.MAX_NUMBERS);
                         numbersSlider.setMin(sessionConfig.MIN_NUMBERS);
                         numbersSlider.setMax(sessionConfig.MAX_NUMBERS);
 
