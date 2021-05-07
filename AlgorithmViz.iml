@@ -14,6 +14,7 @@
     <orderEntry type="library" exported="" name="gson-2.8.6" level="project" />
     <orderEntry type="library" exported="" name="guava-30.1-jre" level="project" />
     <orderEntry type="library" exported="" name="mysql-connector-java-8.0.23" level="project" />
-    <orderEntry type="library" exported="" name="javafx-swt" level="project" />
+    <orderEntry type="library" exported="" name="javafx-11" level="project" />
+    <orderEntry type="library" exported="" name="javafx-11-windows" level="project" />
   </component>
 </module>
