@@ -105,19 +105,49 @@
             </AnchorPane>
          </children>
       </StackPane>
-      <HBox layoutX="116.0" layoutY="640.0" prefHeight="43.0" prefWidth="971.0" spacing="80.0">
+      <HBox layoutX="8.0" layoutY="638.0" prefHeight="43.0" prefWidth="718.0" spacing="80.0">
          <children>
-            <HBox alignment="CENTER" prefHeight="43.0" prefWidth="786.0">
+            <HBox alignment="CENTER" prefHeight="43.0" prefWidth="612.0">
                <children>
-                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="134.0" text="Sleep Duration" textAlignment="CENTER">
+                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="134.0" text="Numbers" textAlignment="CENTER">
                      <font>
                         <Font name="Open Sans Bold" size="13.0" />
                      </font>
                   </Label>
-                  <VBox fx:id="configSpeedVbox" alignment="CENTER" prefHeight="43.0" prefWidth="517.0">
+                  <Text fx:id="configNumberIndicator" strokeType="OUTSIDE" strokeWidth="0.0" text="0" textAlignment="CENTER" />
+                  <VBox fx:id="configSpeedVbox" alignment="CENTER" prefHeight="43.0" prefWidth="317.0">
                      <children>
-                        <Slider fx:id="configSpeed" prefHeight="16.0" prefWidth="494.0" />
-                        <Text fx:id="configSpeedIndicator" strokeType="OUTSIDE" strokeWidth="0.0" text="0.001s" textAlignment="CENTER" />
+                        <Slider fx:id="configNumber" prefHeight="16.0" prefWidth="395.0" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </HBox>
+      <HBox layoutX="115.0" layoutY="691.0" prefHeight="43.0" prefWidth="971.0" spacing="80.0" />
+      <HBox alignment="CENTER" layoutX="706.0" layoutY="641.0" prefHeight="43.0" prefWidth="382.0">
+         <children>
+            <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="0.0" prefWidth="128.0" text="Algorithms" textAlignment="CENTER">
+               <font>
+                  <Font name="Open Sans Bold" size="13.0" />
+               </font>
+            </Label>
+            <VBox fx:id="algoVBox" alignment="CENTER" prefHeight="43.0" prefWidth="260.0" />
+         </children>
+      </HBox>
+      <HBox layoutX="7.0" layoutY="688.0" prefHeight="43.0" prefWidth="718.0" spacing="80.0">
+         <children>
+            <HBox alignment="CENTER" prefHeight="43.0" prefWidth="612.0">
+               <children>
+                  <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="134.0" text="Sleep Delay" textAlignment="CENTER">
+                     <font>
+                        <Font name="Open Sans Bold" size="13.0" />
+                     </font>
+                  </Label>
+                  <Text fx:id="configSpeedIndicator" strokeType="OUTSIDE" strokeWidth="0.0" text="0.001s" textAlignment="CENTER" />
+                  <VBox fx:id="configSpeedVbox1" alignment="CENTER" prefHeight="43.0" prefWidth="317.0">
+                     <children>
+                        <Slider fx:id="configSpeed" prefHeight="16.0" prefWidth="395.0" />
                      </children>
                   </VBox>
                </children>

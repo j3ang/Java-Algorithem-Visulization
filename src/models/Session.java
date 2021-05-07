@@ -2,9 +2,11 @@ package models;
 
 import javafx.scene.Scene;
 import javafx.scene.chart.XYChart;
+import models.algorithms.commons.SortTask;
 
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 
 // https://stackoverflow.com/questions/46508098/how-to-keep-user-information-after-login-in-javafx-desktop-application
 public final class Session{
@@ -14,6 +16,7 @@ public final class Session{
     private int[] generatedNumbers;
     private Thread thread;
     private String duration;
+	private List<Class<SortTask>> availableSortTasks;
 
     public Session(ConfigModel config) {
         Session.config = config;
@@ -27,8 +30,15 @@ public final class Session{
         return instance;
     }
 
+	public List<Class<SortTask>> getAvailableSortTasks() {
+		return availableSortTasks;
+	}
 
-    public ConfigModel getConfig() {
+	public void setAvailableSortTasks(List<Class<SortTask>> availableSortTasks) {
+		this.availableSortTasks = availableSortTasks;
+	}
+
+	public ConfigModel getConfig() {
         return config;
     }
 

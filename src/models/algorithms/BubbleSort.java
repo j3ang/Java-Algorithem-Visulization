@@ -27,12 +27,11 @@ public class BubbleSort extends SortTask {
         try {
             stopwatch = Stopwatch.createStarted();// Print to console
             for (int i = 0; i < n - 1; i++) {
+
                 // as long as the index is less than the length after deducted first number index
                 for (int j = 0; j < n - i - 1; j++) {
                     setStyleAt(j, getStyleAt(j) + borderBottomBlack);
-
-                    Thread.sleep(session.getConfig().getSpeedInterval());
-
+					Thread.sleep(session.getConfig().getSpeedInterval());
 
                     if (getYvalueAt(j) > getYvalueAt(j + 1)) {
                         System.out.println("sleeping: " + session.getConfig().getSpeedInterval());
@@ -55,6 +54,7 @@ public class BubbleSort extends SortTask {
             stopwatch.stop();
             updateMessage( "Time Elapsed: " + stopwatch.elapsed(TimeUnit.SECONDS) + " seconds" );
             saveActivity();
+			session.getConfig().setSorted(true); // trigger main view for when switch the algorithms
 
         } catch (InterruptedException e) {
             System.out.println(e.getMessage());

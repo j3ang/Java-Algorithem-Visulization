@@ -4,11 +4,12 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.BarChart;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import models.Session;
 import models.algorithms.commons.NumbersList;
@@ -30,9 +31,11 @@ public class MainController extends ConfigurationController implements Initializ
     @FXML
     private BarChart<String, Integer> chart;
     @FXML
-    private final XYChart.Series<String, Integer> chartData = new XYChart.Series();
+    private XYChart.Series<String, Integer> chartData ;
     @FXML
     private Text durationText;
+	@FXML
+	private VBox algoVBox;
 
     Session session = Session.getInstace();
     Thread sortingThread;
@@ -48,9 +51,20 @@ public class MainController extends ConfigurationController implements Initializ
     }
 
     public void setupControllers() {
+
+		// Numbers Slider
+		Slider numbersSlider = (Slider) chart.getParent().getParent().lookup("#configNumber");
+		Text numbersText = (Text) chart.getParent().getParent().lookup("#configNumberIndicator");
+
+		setNumberSliderDefault(session, numbersSlider, numbersText);
+		numbersSliderListener(session, numbersSlider, numbersText);
+
+    	// Sleep Delays Slider
         Slider timeDurationSlider = (Slider) chart.getParent().getParent().lookup("#configSpeed");
         Text timeDurationText = (Text) chart.getParent().getParent().lookup("#configSpeedIndicator");
         timeDurationSliderListener(session, timeDurationSlider, timeDurationText);
+
+
 
         // Add start button
         Button startBtn = new Button("Start");
@@ -61,16 +75,62 @@ public class MainController extends ConfigurationController implements Initializ
             });
         });
 
-        ((HBox) timeDurationSlider.getParent().getParent()).getChildren().add(startBtn);
-        ((HBox) timeDurationSlider.getParent().getParent()).setSpacing(40);
-        ((HBox) timeDurationSlider.getParent().getParent()).setPrefWidth(1169);
+		ListView algoList = getAlgorithmsListView(algoVBox);
+		setAlgolistAction(algoList,chart);
+
+
+		// Other styling
+		HBox numberSliderHBox = ((HBox) numbersSlider.getParent().getParent());
+		numberSliderHBox.setSpacing(40);
+		numberSliderHBox.setPrefWidth(1169);
+
+		HBox timeDurationSliderHBox = ((HBox) timeDurationSlider.getParent().getParent());
+		timeDurationSliderHBox.getChildren().add(startBtn);
+		timeDurationSliderHBox.setSpacing(40);
+		timeDurationSliderHBox.setPrefWidth(1169);
 
     }
 
+    // overload to shuffle numbers
+	void numbersSliderListener(Session session, Slider slider, Text indicator) {
+		slider.valueProperty().addListener((observableValue, initValue, newValue) -> {
+			int currentNumbers = newValue.intValue();
+			System.out.println("Slider " + slider.getId() + " value changed:" + currentNumbers);
+			indicator.setText(String.valueOf(currentNumbers));  // update indicator numbers
+			session.getConfig().setNumbersSize(currentNumbers); // update session config numbers
+			setUpChart();
+		});
+	}
+
+    // Overload to add chart so title can be changed
+	public void setAlgolistAction(ListView algoList, Chart chart){
+		// Set session algorithms on click
+		algoList.setOnMouseClicked(mouseEvent -> {
+			try{
+				String selectedAlgo = algoList.getSelectionModel().getSelectedItem().toString();
+				System.out.println("Selected: " + selectedAlgo + " | Saving to session config...");
+				session.getConfig().setAlgorithmSelected( selectedAlgo ) ;
+				chart.setTitle(selectedAlgo);
+
+				// if sorted then get new set of numbers
+				if (session.getConfig().isSorted()){
+					this.chart.getData().clear();
+					this.chart.layout();
+					System.out.println("before new dataL " + this.chart.getData());
+					setUpChart();
+				}
+			} catch ( NullPointerException e ){
+				System.out.println("No Algorithm Selected!");
+			}
+		});
+	}
 
 
     public void setUpChart() {
-
+		chart.getData().clear();
+		chart.layout();
+    	chartData = new XYChart.Series<>();
+		chart.getData().add(chartData); // Apply chart series  to the chart
 
         // session set up generated numbers
         int[] numbersArr = getRandomNumbers(session.getConfig().getNumbersSize(), 338);
@@ -85,20 +145,20 @@ public class MainController extends ConfigurationController implements Initializ
 
         for (int i = 0; i < rainbowColoredNumbersMap.size(); i++) {
             int number = (int) rainbowColoredNumbersMap.get(i).keySet().toArray()[0];
-            chartData.getData().add(new XYChart.Data(String.valueOf(i + 1), number));
+			chartData.getData().add(new XYChart.Data<>(String.valueOf(i + 1), number));
         }
-
-        // Apply chart series  to the chart
-        chart.getData().addAll(chartData);
-        System.out.println("charData: " + chartData.getData());
 
         // Set bar color
         for (int j = 0; j < chartData.getData().size(); j++) {
             String color = rainbowColoredNumbersMap.get(j).values().toArray()[0].toString();
-            XYChart.Data thisData = chartData.getData().get(j);
+			XYChart.Data<String, Integer> thisData = chartData.getData().get(j);
             thisData.getNode().setStyle("-fx-bar-fill: " + color + ";");
 
+			// repopulate the chartData
+			// number keeps turning to double during the re-setup
+			chartData.getData().get(j).setYValue(numbersArr[j]);
         }
+
 
         // Other Chart style
         chart.setLegendVisible(false);
@@ -106,9 +166,13 @@ public class MainController extends ConfigurationController implements Initializ
         chart.getYAxis().setTickMarkVisible(false);
         chart.getXAxis().setTickMarkVisible(false);
 
+
+
+
     }
 
     private void startSort() {
+
 
         // Create new sorting Task based on selection
         sortTask = getSelectedSortTask();

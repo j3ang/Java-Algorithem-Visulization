@@ -44,7 +44,7 @@ public class LoginController extends DaoModel implements Initializable {
 
 
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        Main.showImage("assets/img/algoViz_login.jpg", brandingImageView);
+        Main.showImage("/assets/img/algoViz_login.jpg", brandingImageView);
     }
 
     /**

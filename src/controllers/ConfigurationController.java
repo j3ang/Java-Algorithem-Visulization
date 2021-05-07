@@ -1,6 +1,7 @@
 package controllers;
 
 import application.Main;
+import com.google.gson.Gson;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -13,18 +14,18 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import models.ConfigModel;
-import models.Session;
-import models.UserModel;
+import models.*;
 import models.algorithms.commons.NumbersList;
 import models.algorithms.commons.SortTask;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,44 +62,10 @@ public class ConfigurationController extends NumbersList implements Initializabl
     }
 
     private void setUpConfigs() {
-        // Display available algorithms
-        List<Class<SortTask>> sortTasks = getAlgorithms("models.algorithms");
-        ListView algoList = new ListView();
 
-        // Add to algorithms list view
-        for (Object algo : sortTasks){
-            algoList.getItems().add(algo.toString());
-            System.out.println("algo.getClass(): " +  algo);
-        }
-        algoVBox.getChildren().add(algoList);
-        algoVBox.setSpacing(40);
-
-        // Default sorting algorithm to first item in the list if session did not set
-        if ( session.getConfig().getAlgorithmSelected() == null ){
-            algoList.getSelectionModel().selectFirst();
-        } else {
-            int index = 0;
-            for ( Object algo : algoList.getItems() ){
-                System.out.println("availABLE ALGO: " + algo);
-                if (algo.toString().contains(session.getConfig().getAlgorithmSelected())){
-                    algoList.getSelectionModel().select(index);
-                }
-                index += 1;
-            }
-        }
-
-        // Save selected algorithm task to session
-        session.getConfig().setAlgorithmSelected( algoList.getSelectionModel().getSelectedItem().toString() ); ;
-
-        // Set session algorithms on click
-        algoList.setOnMouseClicked(mouseEvent -> {
-            try{
-                System.out.println("Selected: " + algoList.getSelectionModel().getSelectedItem() + " | Saving to session config...");
-                session.getConfig().setAlgorithmSelected( algoList.getSelectionModel().getSelectedItem().toString() ) ;
-            } catch ( NullPointerException e ){
-                System.out.println("No Algorithm Selected!");
-            }
-        });
+    	// set up algorithms list views
+		ListView algoList = getAlgorithmsListView(algoVBox);
+		setAlgolistAction(algoList);
 
         // Parameters controllers
         for (int i = 0; i < configsAnchor.getChildren().size(); i++) {
@@ -120,16 +87,7 @@ public class ConfigurationController extends NumbersList implements Initializabl
                         numbersSlider.setValue(sessionConfig.getNumbersSize());
 
                         // config number slider event listener
-                        numbersSlider.valueProperty().addListener(new ChangeListener<Number>() {
-                            @Override
-                            public void changed(ObservableValue<? extends Number> observableValue, Number initValue, Number newValue) {
-                                int currentNumbers = newValue.intValue();
-                                System.out.println("Slider " + id + " value changed:" + currentNumbers);
-                                indicator.setText(String.valueOf(currentNumbers)); // update indicator numbers
-                                sessionConfig.setNumbersSize(currentNumbers);          // update session config numbers
-                            }
-                        });
-
+						numbersSliderListener(session, numbersSlider, indicator);
                         break;
 
                     case "configSpeed":
@@ -148,94 +106,201 @@ public class ConfigurationController extends NumbersList implements Initializabl
         }
     }
 
+    void setNumberSliderDefault(Session session, Slider slider, Text indicator){
+		// Set default value
+		sliderConfig(slider, session.getConfig().MAX_NUMBERS);
+		slider.setMin(session.getConfig().MIN_NUMBERS);
+		slider.setMax(session.getConfig().MAX_NUMBERS);
+		slider.setValue(session.getConfig().getNumbersSize());
+		indicator.setText( session.getConfig().getNumbersSize() + " numbers");
+	}
+
+	void numbersSliderListener(Session session, Slider slider, Text indicator) {
+		setNumberSliderDefault(session, slider, indicator);
+		slider.valueProperty().addListener((observableValue, initValue, newValue) -> {
+			int currentNumbers = newValue.intValue();
+			System.out.println("Slider " + slider.getId() + " value changed:" + currentNumbers);
+			indicator.setText(String.valueOf(currentNumbers));  // update indicator numbers
+			session.getConfig().setNumbersSize(currentNumbers); // update session config numbers
+		});
+	}
+
+	void timeDurationSliderListener(Session session, Slider slider, Text text) {
+		// Set default value
+		sliderConfig(slider, session.getConfig().MAX_SPEED_INTERVAL);
+		slider.setMin(session.getConfig().MIN_SPEED_INTERVAL);
+		slider.setMax(session.getConfig().MAX_SPEED_INTERVAL);
+		slider.setValue(session.getConfig().getSpeedInterval());
+		text.setText((session.getConfig().getSpeedInterval() * 1000.0) / 1000.0 + " millisec");
+
+		slider.valueProperty().addListener((observableValue, initValue, newValue) -> {
+			long currentIntervalSpeed = Double.valueOf((Double) newValue).longValue();
+			System.out.println("Slider  " + slider.getId() + " value changed:" + currentIntervalSpeed);
+			text.setText((currentIntervalSpeed * 1000.0) / 1000.0 + " millisec"); // update indicator speed interval
+			session.getConfig().setSpeedInterval(currentIntervalSpeed);    // update session config speed interval
+		});
+	}
+
+
+	public ListView getAlgorithmsListView(VBox algoVBox ){
+		// Display available algorithms
+		List<Class<SortTask>> sortTasks = getAlgorithms("models.algorithms");
+		ListView algoList = new ListView();
+
+		// Add to algorithms list view
+		for (Object algo : sortTasks){
+			algoList.getItems().add(algo.toString());
+			System.out.println("algo.getClass(): " +  algo);
+		}
+		algoVBox.getChildren().add(algoList);
+		algoVBox.setSpacing(40);
+
+		// Default sorting algorithm to first item in the list if session did not set
+		if ( session.getConfig().getAlgorithmSelected() == null ){
+			algoList.getSelectionModel().selectFirst();
+		} else {
+			int index = 0;
+			for ( Object algo : algoList.getItems() ){
+				System.out.println("availABLE ALGO: " + algo);
+				if (algo.toString().contains(session.getConfig().getAlgorithmSelected())){
+					algoList.getSelectionModel().select(index);
+				}
+				index += 1;
+			}
+		}
+
+		System.out.println("algoList.getSelectionModel().getSelectedItem().toString(): " + algoList);
+		// Save selected algorithm task to session
+		session.getConfig().setAlgorithmSelected( algoList.getSelectionModel().getSelectedItem().toString() );
+
+		return algoList;
+	}
+
+	public void setAlgolistAction(ListView algoList){
+		// Set session algorithms on click
+		algoList.setOnMouseClicked(mouseEvent -> {
+			try{
+				System.out.println("Selected: " + algoList.getSelectionModel().getSelectedItem() + " | Saving to session config...");
+				session.getConfig().setAlgorithmSelected( algoList.getSelectionModel().getSelectedItem().toString() ) ;
+
+			} catch ( NullPointerException e ){
+				System.out.println("No Algorithm Selected!");
+			}
+		});
+	}
+
 
     // https://stackoverflow.com/questions/1810614/getting-all-classes-from-a-package
     private List<Class<SortTask>> getAlgorithms(String packageName)  {
-
+		DaoModel dao = new DaoModel();
         List<Class<SortTask>> sortTasks = new ArrayList<>();
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
         try {
             URL root = loader.getResource(packageName.replace(".", "/"));
-            String outPath = "algorithms.ser";
 
-            System.out.println("root.getProtocol() " + root.getProtocol());
-            System.out.println("root : " + root);
-
-            // Deserialize algorithms.ser
+            // running from jar file
             if (root.getProtocol().equals("jar")){
-                FileInputStream fileIn = new FileInputStream(outPath);
-                ObjectInputStream in = new ObjectInputStream(fileIn);
-                sortTasks = (List<Class<SortTask>>) in.readObject();
-                in.close();
-                fileIn.close();
-            } else {
-                // Filter .class files.
-                assert root != null;
-                File[] files = new File(root.getFile()).listFiles((dir, name) -> name.endsWith(".class"));
+				System.out.println("getting algorithms from database...");
+				try{
+					String[] parsedOptionValue = getAlgos(dao).toString()
+							.replaceAll("\\[", "")
+							.replaceAll("\\]", "")
+							.split(",");
 
-                // Find classes implementing ICommand.
-                for (File file : files) {
-                    String className = file.getName().replaceAll(".class$", "");
-                    if ( !className.contains( " " ) ){
-						System.out.println( "found: " + className );
-						Class<?> cls = Class.forName(packageName + "." + className);
-						if (SortTask.class.isAssignableFrom(cls)) {
+					for ( String algo : parsedOptionValue ) {
+						Class<?> cls = Class.forName(algo.trim());
+						if (SortTask.class.isAssignableFrom(cls)){
 							sortTasks.add((Class<SortTask>) cls);
 						}
 					}
 
-                }
+				} catch ( NullPointerException e){
+					System.out.println(e.getMessage());
+				}
 
-                // Serialize this so jar file can read
-                // https://www.tutorialspoint.com/java/java_serialization.htm
-                System.out.println("Serializing algorithms...");
-                File algos = new File(outPath);
-                algos.createNewFile();
-                FileOutputStream fileOut = new FileOutputStream(algos, false);
-                ObjectOutputStream out = new ObjectOutputStream(fileOut);
-                out.writeObject(sortTasks);
-                out.close();
-                fileOut.close();
-                System.out.printf("Serialized data is saved in " + outPath);
+			} else { // running from IDE can read from file system
+				// Filter .class files.
+				assert root != null;
+				File[] files = new File(root.getFile()).listFiles((dir, name) -> name.endsWith(".class"));
+				Vector<String> algoList = new Vector<>(); // contains the class names
+
+				// Find classes implementing ICommand.
+				for (File file : files) {
+					String className = file.getName().replaceAll(".class$", "");
+					if ( !className.contains( " " ) ){
+						System.out.println( "found: " + className );
+						String taskName = packageName + "." + className;
+						Class<?> cls = Class.forName(taskName);
+						if (SortTask.class.isAssignableFrom(cls)) {
+							sortTasks.add((Class<SortTask>) cls);
+							algoList.add(taskName);
+						}
+					}
+				}
+
+				// save to database for jar file to read
+				saveUpdateAlgo(dao, algoList);
             }
 
-        } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-        } catch ( NullPointerException e){
-            System.out.println("Reading available algorithms from serialized object...");
+        } catch (ClassNotFoundException e ) {
+			System.out.println(e.getMessage());
         }
-
-        return sortTasks;
+		return sortTasks;
     }
 
+	private Vector<String> getAlgos(DaoModel dao) {
+		Vector algoList = new Vector();
+    	try{
+			String optionTable = dao.getTableName("options");
+			String sql = "SELECT option_value from " + optionTable + " where option_key='algorithms';";
+			ResultSet rs = new DbConnect().connect().createStatement().executeQuery(sql);
+			algoList = dao.readData(rs, optionTable);
+			return algoList;
+		} catch (SQLException e){
+    		e.printStackTrace();
+		}
+
+    	return algoList;
+	}
+
+	public void saveUpdateAlgo(DaoModel dao, Vector<String> algoList){
+		// Save to Database
+		String optionTable = dao.getTableName("options");
+		String sql = "";
+
+		ArrayList<String> option = new ArrayList<>();
+		option.add("algorithms");
+		option.add(algoList.toString());
+
+		// algorithms option exists?
+		if ( dao.rowExists(optionTable, "option_key", "algorithms") ){
+			// do update
+			sql = "UPDATE " + optionTable + " SET option_value='" + algoList + "' where " + dao.getTableCols(optionTable).get(1) + "='algorithms';";
+
+		} else {
+			sql = dao.prepareInsertStmt(
+					optionTable,
+					dao.getTableCols(optionTable),
+					option,
+					false);
+		}
+
+		System.out.println("insert option sql:" + sql);
+		dao.executeStatement(optionTable, sql);
+	}
+    // Overload
     public void sliderConfig(Slider s, double max) {
         s.setShowTickLabels(true);
         s.setShowTickMarks(true);
         s.setMajorTickUnit(max / 5f);
         s.setBlockIncrement(max / 10f);
     }
-
     public void sliderConfig(Slider s, long max) {
         s.setShowTickLabels(true);
         s.setShowTickMarks(true);
         s.setMajorTickUnit(max / 5f);
         s.setBlockIncrement(max / 10f);
-    }
-
-    public void timeDurationSliderListener(Session session, Slider slider, Text text) {
-        // Set default value
-        sliderConfig(slider, session.getConfig().MAX_SPEED_INTERVAL);
-        slider.setMin(session.getConfig().MIN_SPEED_INTERVAL);
-        slider.setMax(session.getConfig().MAX_SPEED_INTERVAL);
-        slider.setValue(session.getConfig().getSpeedInterval());
-        text.setText((session.getConfig().getSpeedInterval() * 1000.0) / 1000.0 + " millisec");
-
-        slider.valueProperty().addListener((observableValue, initValue, newValue) -> {
-            long currentIntervalSpeed = Double.valueOf((Double) newValue).longValue();
-            System.out.println("Slider  " + slider.getId() + " value changed:" + currentIntervalSpeed);
-            text.setText((currentIntervalSpeed * 1000.0) / 1000.0 + " millisec"); // update indicator speed interval
-            session.getConfig().setSpeedInterval(currentIntervalSpeed);    // update session config speed interval
-        });
     }
 
     /**
@@ -269,7 +334,7 @@ public class ConfigurationController extends NumbersList implements Initializabl
      */
     public void initData() {
 
-        Main.showImage("assets/img/avatar.png", avatarImageView);
+        Main.showImage("/assets/img/avatar.png", avatarImageView);
         SplitMenuButton m = setUpLoggedInUser();
 
         // Create Menu Items programmatically

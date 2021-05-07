@@ -27,6 +27,8 @@ public class InsertionSort extends SortTask {
 			int j = i - 1;
 
 			while ( j >= 0 && getYvalueAt(j) > keyValue ){
+				setStyleAt(j, getStyleAt(j).replace("Black", "Transparent"));
+
 				Thread.sleep(session.getConfig().getSpeedInterval());
 				SwapItem swapItem = new SwapItem(
 				chartData.getData().get(j).getYValue(), j+1,
@@ -34,10 +36,12 @@ public class InsertionSort extends SortTask {
 				);
 				updateValue(swapItem);
 
+
 				// Delay
 				System.out.println("Sleeing for " + session.getConfig().getSpeedInterval() );
 
 				j = j - 1;  // move to left
+
 				waitOnFlag();
 			}
 
@@ -50,6 +54,7 @@ public class InsertionSort extends SortTask {
 		// Update message to view
 		updateMessage( "Time Elapsed: " + stopwatch.elapsed(TimeUnit.SECONDS) + " seconds" );
 		saveActivity();// Save to database
+		session.getConfig().setSorted(true); // trigger main view for when switch the algorithms
     }
 
 

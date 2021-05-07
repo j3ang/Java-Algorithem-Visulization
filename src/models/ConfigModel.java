@@ -2,20 +2,30 @@ package models;
 
 public class ConfigModel{
 
-    public final int MAX_NUMBERS = 200;
+    public final int MAX_NUMBERS = 100;
     public final int MIN_NUMBERS = 5;
 
     public final int MAX_SPEED_INTERVAL = 2000;
     public final int MIN_SPEED_INTERVAL = 10;
 
-    int numbersSize;
-    String algorithmSelected;
-    long speedInterval;
+    private int numbersSize;
+    private String algorithmSelected;
+    private long speedInterval;
+    private boolean isSorted;
 
     // Construstor with default configure values
 	public ConfigModel() {
 		this.numbersSize = 20;
 		this.speedInterval = 10;
+		this.isSorted = false;
+	}
+
+	public boolean isSorted() {
+		return isSorted;
+	}
+
+	public void setSorted(boolean sorted) {
+		isSorted = sorted;
 	}
 
 	public int getNumbersSize() {

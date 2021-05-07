@@ -41,7 +41,7 @@ public abstract class SortTask extends Task<SwapItem> {
     public abstract Runnable getSwapCode(SwapItem swapItem);
 
     protected int getYvalueAt(int index) {
-        return chartData.getData().get(index).getYValue();
+		return chartData.getData().get(index).getYValue();
     }
     protected void setValueAt(int index, int value) {
         chartData.getData().get(index).setYValue(value);

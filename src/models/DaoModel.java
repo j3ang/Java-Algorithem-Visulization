@@ -21,7 +21,7 @@ public class DaoModel<T> {
     DbConnect conn = null;
     Dotenv dotenv = Dotenv.load();
     String tablePrefix = dotenv.get("DB_PREFIX");
-    
+
     public DbConnect getConnection(){
         return conn;
     }
@@ -249,18 +249,10 @@ public class DaoModel<T> {
             }
 
             sqlstmt.close(); // close statement
-
+			rs.close();
         } catch (SQLException se){
             se.printStackTrace();
-        } finally { // close db connection
-            try {
-                rs.close();
-            } catch (SQLException throwables) {
-                throwables.printStackTrace();
-            }
         }
-
-
 
         return false;
     }

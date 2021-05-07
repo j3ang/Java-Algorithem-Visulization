@@ -48,13 +48,13 @@ public class NumbersList  {
     }
 
     // https://www.educative.io/edpresso/how-to-generate-random-numbers-in-java
-    public int[] getRandomNumbers(int size, double drawingWrapperHeight) {
+    public int[] getRandomNumbers(int size, double upperBound) {
         int[] arr = new int[size];
         Random randNum = new Random();
-        System.out.println("bound is : " +  drawingWrapperHeight );
+        System.out.println("bound is : " +  upperBound );
         for (int i = 0; i < size; i++) {
             // https://stackoverflow.com/questions/5827023/java-random-giving-negative-numbers
-            arr[i] = randNum.nextInt(  Double.valueOf(drawingWrapperHeight).intValue() );
+            arr[i] = randNum.nextInt(  Double.valueOf(upperBound).intValue() );
         }
 
         return arr;

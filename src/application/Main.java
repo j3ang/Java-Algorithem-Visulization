@@ -51,7 +51,8 @@ public class Main extends Application {
         System.out.println("main.showImage(): " + imageView);
         try {
             File brandingImageFile = new File(pathname);
-            Image image = new Image(brandingImageFile.toURI().toString());
+			System.out.println("Main.class.getResource(pathname):" + Main.class.getResource(pathname));
+            Image image = new Image(String.valueOf(Main.class.getResource(pathname)));
             imageView.setImage(image);
             imageView.setCache(true);
         } catch (Exception e) {
