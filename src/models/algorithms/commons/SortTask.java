@@ -17,14 +17,16 @@ public abstract class SortTask extends Task<SwapItem> {
     protected XYChart.Series<String, Integer> chartData;
     protected Session session;
     protected final AtomicBoolean flag;
-    public Stopwatch stopwatch;
+    protected Stopwatch stopwatch;
+	protected String borderBottomBlack;
 
-    public SortTask() {
+	public SortTask() {
         this.chartData = chartData;
         this.session = session;
         this.flag = new AtomicBoolean(false);
         this.stopwatch = stopwatch;
-    }
+		this.borderBottomBlack = "-fx-border-color: transparent transparent Black transparent; -fx-border-width:8;";
+	}
 
     @Override
     protected SwapItem call() throws Exception {

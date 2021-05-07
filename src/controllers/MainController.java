@@ -134,15 +134,13 @@ public class MainController extends ConfigurationController implements Initializ
 
         // Update time elapsed
         durationText.textProperty().bind(sortTask.messageProperty());
-
-
-
     }
 
     // Created sorting task from selection
     // https://stackoverflow.com/questions/1268817/create-new-object-from-a-string-in-java
     private SortTask getSelectedSortTask(){
         SortTask sortTask = null;
+
         try{
             String task = session.getConfig().getAlgorithmSelected();
             String className = task.replace("class ", "");
@@ -164,10 +162,10 @@ public class MainController extends ConfigurationController implements Initializ
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-        
+
         return sortTask;
     }
-    
+
 }
 
 

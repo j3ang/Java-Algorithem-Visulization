@@ -5,11 +5,13 @@ import application.Main;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 import models.DaoModel;
 import models.LoginModel;
 import models.UserModel;
@@ -27,7 +29,7 @@ public class LoginController extends DaoModel implements Initializable {
     @FXML
     private Label loginMessage;
     @FXML
-    private Button btnLogin;
+    private Button closeBtn;
     @FXML
     private Button btnSignUp;
 
@@ -100,4 +102,9 @@ public class LoginController extends DaoModel implements Initializable {
     }
 
 
+    public void closeBtnOnAction(ActionEvent evt){
+		System.out.println("Close Btn clicked.");
+		Stage stage = (Stage) ((Node) evt.getSource()).getScene().getWindow();
+		stage.close();
+	}
 }

@@ -12,14 +12,12 @@ import java.util.concurrent.TimeUnit;
 
 public class BubbleSort extends SortTask {
 
+	// Constructors
     // this will setup the rectangles Array
+	public BubbleSort() {
+		super();
+	}
     public BubbleSort(XYChart.Series<String, Integer> chartData, Session session) {
-        super();
-    }
-
-    String borderBottomBlack = "-fx-border-color: transparent transparent Black transparent; -fx-border-width:8;";
-
-    public BubbleSort() {
         super();
     }
 
