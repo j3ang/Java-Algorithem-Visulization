@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.*?>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="828.0" prefWidth="1169.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.ProfileController">
+   <children>
+      <AnchorPane layoutX="74.0" layoutY="266.0">
+         <children>
+            <VBox layoutY="2.0" prefHeight="258.0" prefWidth="85.0" spacing="20.0">
+               <children>
+                  <Label text="ID" />
+                  <Label text="Firstname" />
+                  <Label text="LastName" />
+                  <Label text="Username" />
+                  <Label text="Password" />
+               </children>
+            </VBox>
+            <VBox fx:id="usersVboxInput" alignment="TOP_RIGHT" layoutX="122.0" prefHeight="258.0" prefWidth="210.0" spacing="10.0">
+               <children>
+                  <TextField fx:id="usersInputUserId" editable="false" opacity="0.7" style="-fx-background-color: lightgray;">
+                     <cursor>
+                        <Cursor fx:constant="NONE" />
+                     </cursor>
+                  </TextField>
+                  <TextField fx:id="usersInputFirstname" />
+                  <TextField fx:id="usersInputLastname" prefWidth="147.0" />
+                  <TextField fx:id="usersInputUsername" />
+                  <PasswordField fx:id="usersInputPassword" prefHeight="26.0" prefWidth="204.0" />
+                  <HBox alignment="CENTER_RIGHT" prefHeight="26.0" prefWidth="334.0" spacing="20.0">
+                     <children>
+                        <Button fx:id="usersBtnClear" mnemonicParsing="false" onAction="#BtnClearAction" text="Clear" />
+                        <Button fx:id="usersBtnUpdate" mnemonicParsing="false" onAction="#BtnUpdateUserAction" prefHeight="26.0" prefWidth="99.0" text="Update" />
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <Text fx:id="usersMessage" fill="RED" layoutY="265.0" strokeType="OUTSIDE" strokeWidth="0.0" textAlignment="CENTER" wrappingWidth="334.0" />
+         </children>
+      </AnchorPane>
+      <Button fx:id="usersBtnBack" layoutX="1036.0" layoutY="705.0" mnemonicParsing="false" onAction="#BtnBackAction" text="Back" />
+      <VBox fx:id="vTop" alignment="TOP_RIGHT" layoutX="20.0" layoutY="27.0" prefHeight="180.0" prefWidth="1169.0">
+         <children>
+            <HBox>
+               <children>
+                  <AnchorPane prefHeight="94.0" prefWidth="732.0">
+                     <children>
+                        <VBox layoutX="94.0" layoutY="8.0" prefWidth="200.0" AnchorPane.topAnchor="20.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Algorithm Visualizer" wrappingWidth="233.46484375">
+                                 <font>
+                                    <Font size="24.0" />
+                                 </font>
+                              </Text>
+                           </children>
+                        </VBox>
+                     </children>
+                  </AnchorPane>
+                  <AnchorPane prefHeight="2.0" prefWidth="412.0">
+                     <children>
+                        <Button fx:id="closeBtn" layoutX="343.0" layoutY="18.0" mnemonicParsing="false" text="X" />
+                     </children>
+                  </AnchorPane>
+               </children>
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
+            <AnchorPane prefHeight="62.0" prefWidth="1169.0">
+               <children>
+                  <HBox alignment="CENTER" layoutX="812.0" layoutY="-1.0" prefHeight="49.0" prefWidth="246.0">
+                     <children>
+                        <ImageView fx:id="avatarImageView" fitHeight="49.0" fitWidth="65.0" pickOnBounds="true" preserveRatio="true" style="-fx-scale-x: 60%; -fx-scale-y: 60%;">
+                           <image>
+                              <Image url="@../../assets/img/avatar.png" />
+                           </image>
+                        </ImageView>
+                        <VBox fx:id="loggedinUserVBox" alignment="CENTER_LEFT">
+                           <children>
+                              <Text fx:id="loggedInUserRole" fill="#2f2da1" strokeType="OUTSIDE" strokeWidth="0.0" text="Role">
+                                 <font>
+                                    <Font size="10.0" />
+                                 </font>
+                                 <VBox.margin>
+                                    <Insets bottom="3.0" />
+                                 </VBox.margin>
+                              </Text>
+                              <SplitMenuButton fx:id="splitMenuButton" mnemonicParsing="false" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+                  <Text layoutX="91.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Profile">
+                     <font>
+                        <Font size="77.0" />
+                     </font>
+                  </Text>
+               </children>
+            </AnchorPane>
+            <AnchorPane prefHeight="0.0" prefWidth="1169.0">
+               <children>
+                  <Line endX="935.2906494140625" endY="-1.52587890625E-5" layoutX="145.0" layoutY="9.0" startX="-102.21835327148438" startY="-3.0517578125E-5" />
+               </children>
+            </AnchorPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
