@@ -64,8 +64,6 @@ public class MainController extends ConfigurationController implements Initializ
         Text timeDurationText = (Text) chart.getParent().getParent().lookup("#configSpeedIndicator");
         timeDurationSliderListener(session, timeDurationSlider, timeDurationText);
 
-
-
         // Add start button
         Button startBtn = new Button("Start");
         startBtn.setId("startBtn");
@@ -166,9 +164,6 @@ public class MainController extends ConfigurationController implements Initializ
         chart.getYAxis().setTickMarkVisible(false);
         chart.getXAxis().setTickMarkVisible(false);
 
-
-
-
     }
 
     private void startSort() {
@@ -198,6 +193,7 @@ public class MainController extends ConfigurationController implements Initializ
 
         // Update time elapsed
         durationText.textProperty().bind(sortTask.messageProperty());
+
     }
 
     // Created sorting task from selection

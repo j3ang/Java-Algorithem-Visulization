@@ -98,7 +98,6 @@ public class UserModel {
         userArr.add(lastname);
         userArr.add(username);
         userArr.add(password);
-        userArr.add(new Gson().toJson(roles));
 
         // new user or update user
         String sql = newUser ?
@@ -106,6 +105,12 @@ public class UserModel {
                 :  dao.prepareUpdateStmt(usersTable,userCols, userArr, "where user_id=" + user_id);
 
         dao.executeStatement(usersTable, sql);
+
+        ArrayList defaultRoles = new ArrayList();
+		defaultRoles.add("User");
+
+		UserModel userModelMetaSaved = new UserModel( UserModel.getUserByUsername(dao, username).getUser_id(), defaultRoles );
+		UserModel.setUserRole(dao, userModelMetaSaved);
 
 
     }

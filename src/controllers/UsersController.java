@@ -246,7 +246,8 @@ public class UsersController extends ConfigurationController implements Initiali
     @FXML
     private void BtnNewUserAction(ActionEvent event){
         usersMessage.setText(""); // clear previous messages
-        // save new user of not exist in users table
+
+		// save new user of not exist in users table
         if ( ! dao.rowExists(dao.getTableName("users"), "username", usersInputUsername.getText()) ){
             ArrayList<String> roles = new ArrayList<>();
             roles.add(usersComboRole.getValue().toString());

@@ -1,6 +1,7 @@
 package controllers;
 
 import application.Main;
+import com.google.gson.Gson;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -10,11 +11,13 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 import models.DaoModel;
 import models.UserModel;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ResourceBundle;
 
@@ -31,7 +34,7 @@ public class SignupController implements Initializable  {
     private Label signupMessage;
 
     private final HashMap<String,  Object> form = new HashMap<>();
-
+    private DaoModel dao;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -60,7 +63,7 @@ public class SignupController implements Initializable  {
            }
        }
 
-       // process & validate data
+		// process & validate data
        Boolean isValid = validateForm(formItems);
 
         // Save to database
@@ -68,13 +71,20 @@ public class SignupController implements Initializable  {
 
            DaoModel dao = new DaoModel();
 
+           ArrayList roles = new ArrayList<>();
+           roles.add("User");
+
            UserModel newUserModel = new UserModel(
                    form.get("Firstname").toString(),
                    form.get("Lastname").toString(),
                    form.get("Username").toString(),
-                   form.get("Password").toString());
+                   form.get("Password").toString(),
+				   roles );
+
+
            newUserModel.save(dao, false, true);
 
+		   signupMessage.setTextFill(Color.GREEN);
            signupMessage.setText("Your account has been created.");
            Parent parent = brandingImageView.getParent(); // the Parent (or Scene) that contains the TextFields
            Button cancelBtn = (Button) parent.lookup("#signupBtnCancel");
@@ -101,21 +111,26 @@ public class SignupController implements Initializable  {
      * @return the boolean
      */
     public Boolean validateForm(String[] formItems){
-
+		dao = new DaoModel();
         // Check if account already exists
         System.out.println("Validating form: " + form);
 
         // Message feedback
-        if (form.entrySet().size() == formItems.length){
+        if (form.entrySet().size() == formItems.length ){
             signupMessage.setText("Creating account...");
-            return true;
+
+            if ( ! dao.rowExists(dao.getTableName("users"), "username", form.get("Username").toString() )){
+				return true;
+			} else {
+				signupMessage.setText("Username is taken.");
+				signupMessage.setTextFill(Color.RED);
+			}
         } else {
-            signupMessage.setText("All fields are required.");
-        }
+			signupMessage.setText("All fields are required.");
+			signupMessage.setTextFill(Color.RED);
+		}
 
         return false;
-
-
     }
 
     /**
