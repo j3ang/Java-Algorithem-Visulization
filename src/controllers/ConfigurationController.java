@@ -44,6 +44,8 @@ public class ConfigurationController extends NumbersList implements Initializabl
     private VBox algoVBox;
     @FXML
     private AnchorPane configsAnchor;
+    @FXML
+	private Text loggedInUserRole;
 
     /**
      * The Session config.
@@ -310,7 +312,6 @@ public class ConfigurationController extends NumbersList implements Initializabl
      */
     public SplitMenuButton setUpLoggedInUser() {
         UserModel userModelLoggedIn = Main.userModelLoggedIn;
-
         Text roleText = (Text) loggedinUserVBox.lookup("#" + loggedinUserVBox.getChildren().get(0).getId());
         roleText.setText(userModelLoggedIn.getRoles().get(0));
 
@@ -326,7 +327,6 @@ public class ConfigurationController extends NumbersList implements Initializabl
                         "\n" + "Role: " + userModelLoggedIn.getRoles());
 
         return m;
-
     }
 
     /**

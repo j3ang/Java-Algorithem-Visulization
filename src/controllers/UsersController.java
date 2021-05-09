@@ -233,6 +233,10 @@ public class UsersController extends ConfigurationController implements Initiali
     }
 
 
+    public boolean usernameIsTaken(String username){
+    	return dao.rowExists(dao.getTableName("users"), "username", username) ? true : false;
+	}
+
     @FXML
     private void BtnClearAction(ActionEvent event){
         // Clear fields
@@ -248,7 +252,7 @@ public class UsersController extends ConfigurationController implements Initiali
         usersMessage.setText(""); // clear previous messages
 
 		// save new user of not exist in users table
-        if ( ! dao.rowExists(dao.getTableName("users"), "username", usersInputUsername.getText()) ){
+        if ( ! usernameIsTaken(usersInputUsername.getText()) ){
             ArrayList<String> roles = new ArrayList<>();
             roles.add(usersComboRole.getValue().toString());
 
@@ -273,6 +277,7 @@ public class UsersController extends ConfigurationController implements Initiali
 
     @FXML
     private void BtnUpdateUserAction(ActionEvent event){
+		usersMessage.setText(""); // Clear message if error message was shown previously
         UserModel userModel = (UserModel) usersTable.getSelectionModel().getSelectedItem();
 
         userModel.setUser_id(Integer.parseInt(usersInputUserId.getText().strip()));
@@ -281,6 +286,7 @@ public class UsersController extends ConfigurationController implements Initiali
         userModel.setUsername(usersInputUsername.getText().strip());
         System.out.println("current user input password: " + usersInputPassword.getText().strip());
         System.out.println("user object password: " + userModel.getPassword().strip());
+
         if ( ! usersInputPassword.getText().strip().equals(userModel.getPassword().strip())){
             System.out.println("password changed");
             System.out.println(" hashing new password: " + SignupController.hashPassword(usersInputPassword.getText().strip()));
@@ -289,23 +295,29 @@ public class UsersController extends ConfigurationController implements Initiali
             userModel.setPassword(usersInputPassword.getText().strip());
         }
 
+        if ( ! usernameIsTaken(usersInputUsername.getText()) ){
+			userModel.save(dao, true, false); // Update
 
-        userModel.save(dao, true, false); // Update
+			// User meta roles
+			ArrayList<String> userRoles = new ArrayList<>();
+			userRoles.add(usersComboRole.getValue().toString());
 
-        // User meta roles
-        ArrayList<String> userRoles = new ArrayList<>();
-        userRoles.add(usersComboRole.getValue().toString());
-        UserModel userModelMetaSaved = new UserModel(new UserModel().getUserByUsername(dao, userModel.getUsername()).getUser_id(), userRoles);
-        new UserModel().setUserRole(dao, userModelMetaSaved);
+			UserModel userModelMetaSaved = new UserModel(new UserModel().getUserByUsername(dao, userModel.getUsername()).getUser_id(), userRoles);
 
-        // logout if downgrading current user from admin to user
-        if (usersComboRole.getValue().toString().contains("User") && Main.userModelLoggedIn.getUser_id() == Integer.parseInt(usersInputUserId.getText().strip()) ){
-            System.out.println("Downgraded to user role");
-            System.out.println("Logging out now...");
-            Main.logout(usersBtnUpdate); // pass in a btn from this scene to get current window
-        } else {
-            showUsers(); // Refresh
-        }
+			new UserModel().setUserRole(dao, userModelMetaSaved);
+
+			// logout if downgrading current user from admin to user
+			if (usersComboRole.getValue().toString().contains("User") && Main.userModelLoggedIn.getUser_id() == Integer.parseInt(usersInputUserId.getText().strip()) ){
+				System.out.println("Downgraded to user role");
+				System.out.println("Logging out now...");
+				Main.logout(usersBtnUpdate); // pass in a btn from this scene to get current window
+			} else {
+				showUsers(); // Refresh
+			}
+		} else {
+			usersMessage.setText("Username: " + usersInputUsername.getText() + " is taken.");
+		}
+
 
 
     }

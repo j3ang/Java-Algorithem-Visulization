@@ -63,10 +63,10 @@ public class LoginController extends DaoModel implements Initializable {
                         inputUsername.getText(),
                         SignupController.hashPassword( inputPassword.getText() ) )
                 ){
+					System.out.println("loginBtnAction getting inputUsername: " + inputUsername.getText());
                     Main.userModelLoggedIn = new UserModel().getUserByUsername(this, inputUsername.getText());
+					System.out.println( "Main.userLoggedIn username： " +  Main.userModelLoggedIn.getUsername());
                     nextScreen(evt);
-
-
                 }
                 else
                     loginMessage.setText("Credentials not found in database, try again...");

@@ -88,10 +88,13 @@ public class UserModel {
         String usersTable =  dao.tablePrefix + "users";
         Vector<String> userCols = dao.getTableCols(usersTable);
         ArrayList<String> userArr = new ArrayList<>();
+		ArrayList userRoles = new ArrayList();
 
         // include user_id column if it's saving a new user
         if (includeId && newUser){
             userArr.add(String.valueOf(user_id));
+            // default role for new user
+			userRoles.add("User");
         }
 
         userArr.add(firstname);
@@ -106,11 +109,11 @@ public class UserModel {
 
         dao.executeStatement(usersTable, sql);
 
-        ArrayList defaultRoles = new ArrayList();
-		defaultRoles.add("User");
-
-		UserModel userModelMetaSaved = new UserModel( UserModel.getUserByUsername(dao, username).getUser_id(), defaultRoles );
-		UserModel.setUserRole(dao, userModelMetaSaved);
+        // set default roles for new users
+        if ( newUser ){
+			UserModel userModelMetaSaved = new UserModel( UserModel.getUserByUsername(dao, username).getUser_id(), userRoles );
+			UserModel.setUserRole(dao, userModelMetaSaved);
+		}
 
 
     }
@@ -207,7 +210,11 @@ public class UserModel {
             System.out.println("User.getUserByUsername: creating new DbConnect()");
             ResultSet rs = new DbConnect().connect().createStatement().executeQuery(sql);
             Vector userRs = dao.readData(rs,usersTable);
-            String[] parsedUser = userRs.get(0).toString().replaceAll("\\p{P}","").split(" ");
+			System.out.println("userRs.get(0).toString(): " + userRs.get(0).toString());
+            String[] parsedUser = userRs.get(0).toString()
+					.replaceAll("\\[","")
+					.replaceAll("\\]","")
+					.split(",");
 
             // pull user result data to the user object
             user = vectorToUser(parsedUser);

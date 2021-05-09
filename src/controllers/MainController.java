@@ -42,8 +42,13 @@ public class MainController extends ConfigurationController implements Initializ
     SortTask sortTask;
     // https://gist.github.com/P7h/8691100
 
+	// Controllers
+	Slider numbersSlider;
+	Slider timeDurationSlider;
+	ListView algoList;
+	Button startBtn;
 
-    @Override
+	@Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initData();
         setupControllers();
@@ -53,19 +58,19 @@ public class MainController extends ConfigurationController implements Initializ
     public void setupControllers() {
 
 		// Numbers Slider
-		Slider numbersSlider = (Slider) chart.getParent().getParent().lookup("#configNumber");
+		numbersSlider = (Slider) chart.getParent().getParent().lookup("#configNumber");
 		Text numbersText = (Text) chart.getParent().getParent().lookup("#configNumberIndicator");
 
 		setNumberSliderDefault(session, numbersSlider, numbersText);
 		numbersSliderListener(session, numbersSlider, numbersText);
 
     	// Sleep Delays Slider
-        Slider timeDurationSlider = (Slider) chart.getParent().getParent().lookup("#configSpeed");
+		timeDurationSlider = (Slider) chart.getParent().getParent().lookup("#configSpeed");
         Text timeDurationText = (Text) chart.getParent().getParent().lookup("#configSpeedIndicator");
         timeDurationSliderListener(session, timeDurationSlider, timeDurationText);
 
         // Add start button
-        Button startBtn = new Button("Start");
+		startBtn = new Button("Start");
         startBtn.setId("startBtn");
         startBtn.setOnAction((e) -> {
             Platform.runLater(() -> {
@@ -73,9 +78,8 @@ public class MainController extends ConfigurationController implements Initializ
             });
         });
 
-		ListView algoList = getAlgorithmsListView(algoVBox);
+		algoList = getAlgorithmsListView(algoVBox);
 		setAlgolistAction(algoList,chart);
-
 
 		// Other styling
 		HBox numberSliderHBox = ((HBox) numbersSlider.getParent().getParent());
@@ -92,7 +96,9 @@ public class MainController extends ConfigurationController implements Initializ
     // overload to shuffle numbers
 	void numbersSliderListener(Session session, Slider slider, Text indicator) {
 		slider.valueProperty().addListener((observableValue, initValue, newValue) -> {
+			System.out.println("sorted? :" + session.getConfig().isSorted());
 			int currentNumbers = newValue.intValue();
+
 			System.out.println("Slider " + slider.getId() + " value changed:" + currentNumbers);
 			indicator.setText(String.valueOf(currentNumbers));  // update indicator numbers
 			session.getConfig().setNumbersSize(currentNumbers); // update session config numbers
@@ -122,7 +128,6 @@ public class MainController extends ConfigurationController implements Initializ
 			}
 		});
 	}
-
 
     public void setUpChart() {
 		chart.getData().clear();
@@ -157,7 +162,6 @@ public class MainController extends ConfigurationController implements Initializ
 			chartData.getData().get(j).setYValue(numbersArr[j]);
         }
 
-
         // Other Chart style
         chart.setLegendVisible(false);
         chart.getXAxis().setLabel("Size of numbers");
@@ -172,21 +176,23 @@ public class MainController extends ConfigurationController implements Initializ
         // Create new sorting Task based on selection
         sortTask = getSelectedSortTask();
 
-        // Disable start button if no threads are running
+        // Disable controllers while sort task is running
         sortTask.runningProperty().addListener((observableValue, oldStatus, newStatus) -> {
             Button startBtn = (Button) chart.getParent().getParent().lookup("#startBtn");
-            startBtn.disableProperty().set(newStatus);
+            startBtn.disableProperty().set(newStatus);   	 // start button
+            numbersSlider.disableProperty().set(newStatus);  // numbers slider
+			algoList.disableProperty().set(newStatus);   	 // algorithms list view
         });
 
-        sortingThread = new Thread(sortTask);
-        session.setThread(sortingThread); // pass to session for termination purpose
+        sortingThread = new Thread(sortTask); // Create new sorting thread
+        session.setThread(sortingThread);     // pass to session for termination purpose
         System.out.println("saved sorting thread in session: " + sortingThread);
         sortingThread.setDaemon(true);
-        sortingThread.start();
+        sortingThread.start();   // Start the thread
         System.out.println("new sortingThread: " + sortingThread);
         System.out.println("Sorting is started: " + sortTask.getClass().getName());
 
-        // Add event listener on swap action
+        // Add event listener on sort task swap action
         sortTask.valueProperty().addListener((ObservableValue<? extends SwapItem> observable, SwapItem oldValue, SwapItem newValue) -> {
             sortTask.getSwapCode(newValue).run();
         });
