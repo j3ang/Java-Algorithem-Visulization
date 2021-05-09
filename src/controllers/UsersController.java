@@ -295,17 +295,36 @@ public class UsersController extends ConfigurationController implements Initiali
             userModel.setPassword(usersInputPassword.getText().strip());
         }
 
-        if ( ! usernameIsTaken(usersInputUsername.getText()) ){
-			userModel.save(dao, true, false); // Update
-
+		// if username is not taken or the username is same as current one
+        if ( ! usernameIsTaken(usersInputUsername.getText()) || usersInputUsername.getText().equals(userModel.getUsername()) ){
+			// Update
+        	userModel.save(dao, true, false);
 			// User meta roles
 			ArrayList<String> userRoles = new ArrayList<>();
 			userRoles.add(usersComboRole.getValue().toString());
-
 			UserModel userModelMetaSaved = new UserModel(new UserModel().getUserByUsername(dao, userModel.getUsername()).getUser_id(), userRoles);
-
 			new UserModel().setUserRole(dao, userModelMetaSaved);
+			// Popup
+			confirmSuccessfulUpdate();
+		} else {
+			usersMessage.setText("Username: " + usersInputUsername.getText() + " is taken.");
+		}
+    }
 
+    public void confirmSuccessfulUpdate(){
+    	// Create alert popup
+		Alert alert = new Alert(Alert.AlertType.INFORMATION);
+		alert.setHeaderText("Updated successful");
+		Optional<ButtonType> result = alert.showAndWait();
+
+		if (result.get() == ButtonType.OK){
+			// ... user chose OK
+			System.out.println("\n===================================");
+			System.out.println("your info has updated successfully.");
+			System.out.println("===================================\n");
+			setUpLoggedInUser(); // refresh dropdown menu
+
+			// if password has changed, logout
 			// logout if downgrading current user from admin to user
 			if (usersComboRole.getValue().toString().contains("User") && Main.userModelLoggedIn.getUser_id() == Integer.parseInt(usersInputUserId.getText().strip()) ){
 				System.out.println("Downgraded to user role");
@@ -314,13 +333,12 @@ public class UsersController extends ConfigurationController implements Initiali
 			} else {
 				showUsers(); // Refresh
 			}
+
 		} else {
-			usersMessage.setText("Username: " + usersInputUsername.getText() + " is taken.");
+			// ... user chose CANCEL or closed the dialog
+			System.out.println("request cancelled");
 		}
-
-
-
-    }
+	}
 
     @FXML
     private void BtnDeleteUserAction(ActionEvent event){
