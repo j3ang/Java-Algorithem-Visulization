@@ -459,26 +459,6 @@ public class DaoModel<T> {
 
         return column;
     }
-
-//    public static void main(String[] args) {
-//        DaoModel dao = new DaoModel();
-//        String tablePrefix = dao.tablePrefix;
-//        String tableName = tablePrefix + "activities";
-//        // Prepare statement to execute
-//        String activitiesSQL = "CREATE TABLE IF NOT EXISTS " + tableName  + " " +
-//                "(act_id INTEGER not NULL AUTO_INCREMENT, " +
-//                " user_id INTEGER not NULL, " +
-//                " act_sort_task TEXT NOT NULL, " +
-//                " act_sort_size INTEGER NOT NULL, " +
-//                " act_sort_speed TEXT NOT NULL, " +
-//                " act_sort_duration TEXT NOT NULL, " +
-//                " act_dt_created TIMESTAMP NOT NULL, " +
-//                " PRIMARY KEY ( act_id ), " +
-//                " FOREIGN KEY (user_id) REFERENCES " + tablePrefix + "users(user_id))";
-//
-//        // Execute create query
-//        dao.executeStatement(tableName, activitiesSQL);
-//    }
 }
 
 

@@ -151,10 +151,10 @@ public class UsersController extends ConfigurationController implements Initiali
 
         HashMap<Integer, String> roleMap = new HashMap<>();
         userRoles.forEach(role->{
-            String[] parsedMeta = role.toString().replaceAll("\\p{P}","").split(" ");
-            int parsedId =  Integer.valueOf(parsedMeta[1]);
-            String parsedRole = parsedMeta[3];
-            roleMap.put(parsedId, parsedRole);
+			String[] parsedMeta = role.toString().replaceAll("\\p{P}","").split(" ");
+			int parsedId =  Integer.valueOf(parsedMeta[1]);
+			String parsedRole = parsedMeta[3];
+			roleMap.put(parsedId, parsedRole);
         });
 
         for (int i = 0; i < users.size(); i++){
@@ -163,6 +163,9 @@ public class UsersController extends ConfigurationController implements Initiali
                     .replaceAll("\\[", "")
                     .replaceAll("\\]","")
                     .split(",");
+
+			System.out.println("parsed user:" + Arrays.toString(parsedUser));
+
             // Create new User Object
             UserModel user = UserModel.vectorToUser(parsedUser);
             System.out.println("user id: " + user.getUser_id());
@@ -296,12 +299,17 @@ public class UsersController extends ConfigurationController implements Initiali
         }
 
 		// if username is not taken or the username is same as current one
-        if ( ! usernameIsTaken(usersInputUsername.getText()) || usersInputUsername.getText().equals(userModel.getUsername()) ){
+		UserModel thisUser = userModel.getUserById(dao, Integer.valueOf(usersInputUserId.getText()));
+		System.out.println("usersInputUsername.getText(): " + usersInputUsername.getText());
+		System.out.println("thisUser.getUsername(): " + thisUser.getUsername());
+        if ( (! usernameIsTaken(usersInputUsername.getText()) ) || usersInputUsername.getText().equals( thisUser.getUsername()) ){
+			System.out.println("thisUser.getUsername() username: " + thisUser.getUsername());
+			System.out.println("user input username: " + usersInputUsername.getText());
 			// Update
         	userModel.save(dao, true, false);
 			// User meta roles
 			ArrayList<String> userRoles = new ArrayList<>();
-			userRoles.add(usersComboRole.getValue().toString());
+			userRoles.add(usersComboRole.getValue().toString().replaceAll("\"", ""));
 			UserModel userModelMetaSaved = new UserModel(new UserModel().getUserByUsername(dao, userModel.getUsername()).getUser_id(), userRoles);
 			new UserModel().setUserRole(dao, userModelMetaSaved);
 			// Popup

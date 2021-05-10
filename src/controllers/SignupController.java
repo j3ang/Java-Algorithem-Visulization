@@ -1,7 +1,6 @@
 package controllers;
 
 import application.Main;
-import com.google.gson.Gson;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;

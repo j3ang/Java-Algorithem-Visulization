@@ -1,9 +1,6 @@
 package controllers;
 
 import application.Main;
-import com.google.gson.Gson;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -18,10 +15,8 @@ import models.*;
 import models.algorithms.commons.NumbersList;
 import models.algorithms.commons.SortTask;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URISyntaxException;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;

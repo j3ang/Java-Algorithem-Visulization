@@ -93,9 +93,12 @@ public class UserModel {
         // include user_id column if it's saving a new user
         if (includeId && newUser){
             userArr.add(String.valueOf(user_id));
-            // default role for new user
-			userRoles.add("User");
         }
+
+        if ( newUser ){
+			// default role for new user
+			userRoles.add("User");
+		}
 
         userArr.add(firstname);
         userArr.add(lastname);
